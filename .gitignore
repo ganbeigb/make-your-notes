@@ -1,0 +1,17 @@
+# 依赖与构建产物
+node_modules/
+*.log
+
+# 安装包（体积大，建议用 GitHub Releases 发布）
+*.apk
+*.zip
+
+# 本地数据：包含 API Key、笔记、上传的截图，绝对不能提交
+data/
+userdata/
+
+# 系统 / 编辑器
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
