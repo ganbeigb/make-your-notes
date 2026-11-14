@@ -52,6 +52,8 @@
 | `D:\dshwork\课件知识点助手\CHANGELOG.md` | 78 个版本的完整更新日志 | 新增 |
 | `D:\dshwork\课件知识点助手\MakeYourNotes-v3.10.23.apk` | 手机本地版安装包（新图标，19.9 MB，未入库） | 已重出 |
 | `D:\dshwork\课件知识点助手\CHANGELOG.md` | 78 个版本，三段式编号 + 改号对照 | 已重写 |
+| `D:\dshwork\课件知识点助手\docs\项目文档-MakeYourNotes.docx` | 参赛项目文档（14 章 + 3 附录） | 已生成 |
+| `D:\dshwork\课件知识点助手\docs\build_doc.py` | 生成上述文档的 python-docx 脚本 | 现行 |
 | `D:\dshwork\课件知识点助手\handoff\web-version-handoff.md` | 本文件 | 已更新 |
 
 ## 六、约束与红线
@@ -60,6 +62,14 @@
 - 不可编造：CHANGELOG 里每条必须来自 README 原有记录，不得凭印象新增版本。
 - 用户拒绝过：继续推进原生 Android 版本（`make-your-notes-native`），不要再主动提起或继续开发。
 - 数据：`server/data` 与图片是用户真实数据，本地测试不要覆盖。
+
+## 六之二、参赛材料（杭电第二届 AIGC 应用创新大赛）
+
+- 需要交：项目文档(Word)、演示视频(MP4 ≤5 分钟 / ≤100MB)、方案 PPT(≤20 页)、可选附加材料。
+- 已做：项目文档 docs\项目文档-MakeYourNotes.docx；附加材料用仓库链接与 Releases 里的 APK。
+- 待填：赛题（附件一选哪一条）、团队名称与分工、指导教师、提交日期 —— 文档内是【待填】占位。
+- 待做：方案 PPT、5 分钟录屏脚本与成片。
+- 约定：文档内容有实质改动时，改 docs\build_doc.py 再重新生成 docx，不要单独改 docx。
 
 ## 七、下一步
 
