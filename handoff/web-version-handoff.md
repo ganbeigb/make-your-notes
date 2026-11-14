@@ -12,7 +12,7 @@
 ## 二、当前状态
 
 - 已完成：功能完整可用，最新版本 `v3.10.23`（APK versionCode 78）。共 78 个历史版本，已全部写入 `CHANGELOG.md` 并打上同名 Git tag。
-- 进行中：无。
+- 进行中：无。远端 `ganbeigb/make-your-notes` 已建（public），main 与 78 个 tag 已推送；APK 已用新图标重出。
 - 未开始 / 已放弃：曾尝试把整套应用重写为纯原生 Android（View + SQLite，仓库 `make-your-notes-native`），因 UI 与稳定性问题在第 80 轮后停手，**用户已决定回归网页版**，原生版不再推进。
 
 ## 三、已定决策
@@ -26,8 +26,9 @@
 
 ## 四、未决项
 
-- [ ] GitHub 远端还没配 —— 为什么要：`更新仓库.bat` 里的 push 需要 remote；缺 remote 时只能本地提交。
-- [ ] 手机本地版 APK 是否要用新图标重新构建 —— 为什么要：本次只换了 `android/res/mipmap-*/ic_launcher.png`，`MakeYourNotes-v3.10.23.apk` 里的图标还是旧的，需要跑 `android/build.ps1` 才会生效。
+- [x] ~~GitHub 远端~~ —— 已配：`https://github.com/ganbeigb/make-your-notes`（main + 78 个 tag 都已推送）。
+- [x] ~~APK 新图标~~ —— 已重出：`MakeYourNotes-v3.10.23.apk`（19.9 MB，versionCode 78），已解包核对 `res/mipmap-xxxhdpi-v4/ic_launcher.png` 为新图标。
+- [ ] GitHub Release 是否挂 APK —— 为什么要：APK 20 MB 未入库（`.gitignore` 排除），要发布只能挂 Release 附件。
 
 ## 五、文件清单
 
@@ -45,6 +46,7 @@
 | `D:\dshwork\课件知识点助手\android\` | 手机本地版外壳与打包脚本 | 现行 |
 | `D:\dshwork\课件知识点助手\README.md` | 使用说明（更新记录已改为摘要 + 指向 CHANGELOG） | 已改 |
 | `D:\dshwork\课件知识点助手\CHANGELOG.md` | 78 个版本的完整更新日志 | 新增 |
+| `D:\dshwork\课件知识点助手\MakeYourNotes-v3.10.23.apk` | 手机本地版安装包（新图标，19.9 MB，未入库） | 已重出 |
 | `D:\dshwork\课件知识点助手\handoff\web-version-handoff.md` | 本文件 | 新增 |
 
 ## 六、约束与红线
@@ -58,5 +60,5 @@
 
 1. 若用户要继续开发：先 `git log --oneline -5` 与 `git tag -l | tail -3` 确认版本位置，再在 `public/` 改，改完更新 `CHANGELOG.md` 与本文第二节。
 2. 需要重新出 APK 时：`cd android` → `powershell -ExecutionPolicy Bypass -File build.ps1`，产物在 `android/dist/`。
-3. 配远端：`git remote add origin <仓库地址>` 后 `git push -u origin main`。
+3. 远端已是 `origin = https://github.com/ganbeigb/make-your-notes.git`，直接 `git push` + `git push --tags`。
 4. 每轮结束：更新本文件「二、当前状态」与「七、下一步」，提交时一起 commit。
