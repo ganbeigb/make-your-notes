@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <title>Make Your Notes</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/vendor/katex/katex.min.css" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <meta name="theme-color" content="#15a1b0" />
+</head>
+<body>
+  <div id="app">
+    <aside id="sidebar"></aside>
+    <main id="main">
+      <header id="topbar"></header>
+      <div id="viewbar"></div>
+      <div id="content"></div>
+    </main>
+  </div>
+  <div id="overlay"></div>
+  <div id="toast"></div>
+  <div id="queuebar"></div>
+  <div id="drop">松开鼠标，开始上传</div>
+  <input id="file-input" type="file" accept="image/*" multiple hidden />
+  <input id="backup-input" type="file" accept=".zip,application/zip" hidden />
+  <script src="/vendor/katex/katex.min.js"></script>
+  <script src="/vendor/qrcode/qrcode.js"></script>
+  <script src="/symbols.js"></script>
+<script src="/app.js"></script>
+<script src="/draw.js"></script>
+</body>
+</html>

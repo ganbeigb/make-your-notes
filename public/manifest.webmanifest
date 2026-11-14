@@ -1,0 +1,13 @@
+{
+  "name": "Make Your Notes",
+  "short_name": "MakeYourNotes",
+  "description": "把课件和随手记，变成可以反复复习的结构化知识库。",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fbf8f1",
+  "theme_color": "#15a1b0",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
