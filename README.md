@@ -480,7 +480,7 @@ git push
 
 ## 更新记录
 
-完整历史（共 78 个版本，从 v1.0 到 v3.10.23）见 **[CHANGELOG.md](CHANGELOG.md)**；每个版本在 Git 里都有同名 tag，`git tag -l` 可列全。
+完整历史（共 78 个版本，从 v1.0.0 到 v3.10.23）见 **[CHANGELOG.md](CHANGELOG.md)**；每个版本在 Git 里都有同名 tag，`git tag -l` 可列全。
 
 最近几个版本：
 
