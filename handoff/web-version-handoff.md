@@ -11,8 +11,8 @@
 
 ## 二、当前状态
 
-- 已完成：功能完整可用，当前版本 `v2.53.0`（APK versionCode 80）。共 78 个历史版本，已按变更大小重排为 v1.0.0 → v2.53.0（CHANGELOG 内附「旧编号 → 新编号」逐条对照）
-- 已发布：GitHub Release `v2.53.0` 挂了 APK 附件。
+- 已完成：功能完整可用，当前版本 `v2.27.5`（APK versionCode 81）。共 78 个历史版本，已按变更大小重排为 v1.0.0 → v2.27.5（CHANGELOG 附「旧编号 → 新编号」逐条对照）
+- 已发布：GitHub Release `v2.27.5` 挂了 APK 附件。
 - 仓库：`https://github.com/ganbeigb/make-your-notes`（public，main + 78 tag 已同步）。
 - 进行中：无。远端 `ganbeigb/make-your-notes` 已建（public），main 与 78 个 tag 已推送；APK 已用新图标重出。
 - 未开始 / 已放弃：曾尝试把整套应用重写为纯原生 Android（View + SQLite，仓库 `make-your-notes-native`），因 UI 与稳定性问题在第 80 轮后停手，**用户已决定回归网页版**，原生版不再推进。
@@ -25,14 +25,14 @@
 4. 版本号 `x.y.z` + APK `versionCode` 单调递增，两者一起改 —— 原因：覆盖安装靠 versionCode 判断新旧。
 5. 更新记录只写「用户能感知的变化」，不写实现细节 —— 原因：CHANGELOG 是给人看的，不是代码注释。
 6. 图标使用作者提供的新图（青色圆角方 + 白色 M + 便签），已生成 web 与 Android 各尺寸 —— 原因：原 favicon 是内联 SVG 占位图。
-7. 版本号按**变更大小**重排成三段式，从 1.0.0 起：**只有新增独立页面才升主版本**（历史上唯一一次是加入手写笔记编辑器 → 2.0.0），在已有页面里新增功能升次版本，修复与维护升修订号；每段可为两位数（如 2.10.3）。重排结果共 1 次主版本、54 次功能、22 次修复，当前 `v2.53.0`。
+7. 版本号分三档：**新增独立页面 → 主版本**（全历史唯一一次：手写笔记编辑器 = 2.0.0）；**新能力 → 次版本**（新模块/视图、新导出格式、新数据能力、新输入方式）；**其余（修复、手势与交互调整、参数文案、既有功能改写）→ 修订号**。从 1.0.0 起，每段可为两位数。重排结果：1 次主版本、27 次新能力、49 次小改动，当前 `v2.27.5`。
 8. APK 走 GitHub Release 发布，不入库（`.gitignore` 排除 `*.apk`） —— 原因：单包 20 MB，附件形式更合适。
 
 ## 四、未决项
 
 - [x] ~~GitHub 远端~~ —— 已配：`https://github.com/ganbeigb/make-your-notes`（main + 78 个 tag 都已推送）。
 - [x] ~~APK 新图标~~ —— 已重出：`MakeYourNotes-v3.10.23.apk`（19.9 MB，versionCode 78），已解包核对 `res/mipmap-xxxhdpi-v4/ic_launcher.png` 为新图标。
-- [x] ~~GitHub Release~~ —— 已发：`https://github.com/ganbeigb/make-your-notes/releases/tag/v3.10.23`，附件 `MakeYourNotes-v2.53.0.apk`（20 878 472 字节）。
+- [x] ~~GitHub Release~~ —— 已发：`https://github.com/ganbeigb/make-your-notes/releases/tag/v3.10.23`，附件 `MakeYourNotes-v2.27.5.apk`（20 878 472 字节）。
 
 ## 五、文件清单
 
