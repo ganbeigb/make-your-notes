@@ -4,6 +4,8 @@
 
 把课件和随手记，变成可以反复复习的结构化知识库。
 
+**[下载手机本地版 APK（最新 Release）](https://github.com/ganbeigb/make-your-notes/releases/latest)** · 版本号规则见 [CHANGELOG.md](CHANGELOG.md)
+
 按科目上传课件截图 → DeepSeek 逐页提取知识点、补充拓展 → 也可以自己手写（支持 LaTeX）→ 按你的标准整理成目录 → 导出 Markdown / 备份。
 所有图片和笔记都保存在本机，只有图片和文字会发送给 DeepSeek。
 

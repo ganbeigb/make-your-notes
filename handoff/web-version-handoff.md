@@ -11,7 +11,9 @@
 
 ## 二、当前状态
 
-- 已完成：功能完整可用，最新版本 `v3.10.23`（APK versionCode 78）。共 78 个历史版本，已全部写入 `CHANGELOG.md` 并打上同名 Git tag。
+- 已完成：功能完整可用，当前版本 `v3.10.23`（APK versionCode 78）。共 78 个历史版本，已写入 `CHANGELOG.md` 并打完同名 Git tag（三段式编号，最早的版本为 `v1.0.0`）。
+- 已发布：GitHub Release `v3.10.23` 挂了 APK 附件。
+- 仓库：`https://github.com/ganbeigb/make-your-notes`（public，main + 78 tag 已同步）。
 - 进行中：无。远端 `ganbeigb/make-your-notes` 已建（public），main 与 78 个 tag 已推送；APK 已用新图标重出。
 - 未开始 / 已放弃：曾尝试把整套应用重写为纯原生 Android（View + SQLite，仓库 `make-your-notes-native`），因 UI 与稳定性问题在第 80 轮后停手，**用户已决定回归网页版**，原生版不再推进。
 
@@ -23,12 +25,14 @@
 4. 版本号 `x.y.z` + APK `versionCode` 单调递增，两者一起改 —— 原因：覆盖安装靠 versionCode 判断新旧。
 5. 更新记录只写「用户能感知的变化」，不写实现细节 —— 原因：CHANGELOG 是给人看的，不是代码注释。
 6. 图标使用作者提供的新图（青色圆角方 + 白色 M + 便签），已生成 web 与 Android 各尺寸 —— 原因：原 favicon 是内联 SVG 占位图。
+7. 版本号统一为三段式语义化编号（`主.次.修订`），从 `1.0.0` 起记；历史里缺第三位的（如 v3.3）补齐为 `v3.3.0`，其余编号不变 —— 原因：作者要求版本号符合大小版本规律，从 1.0.0 开始记。
+8. APK 走 GitHub Release 发布，不入库（`.gitignore` 排除 `*.apk`） —— 原因：单包 20 MB，附件形式更合适。
 
 ## 四、未决项
 
 - [x] ~~GitHub 远端~~ —— 已配：`https://github.com/ganbeigb/make-your-notes`（main + 78 个 tag 都已推送）。
 - [x] ~~APK 新图标~~ —— 已重出：`MakeYourNotes-v3.10.23.apk`（19.9 MB，versionCode 78），已解包核对 `res/mipmap-xxxhdpi-v4/ic_launcher.png` 为新图标。
-- [ ] GitHub Release 是否挂 APK —— 为什么要：APK 20 MB 未入库（`.gitignore` 排除），要发布只能挂 Release 附件。
+- [x] ~~GitHub Release~~ —— 已发：`https://github.com/ganbeigb/make-your-notes/releases/tag/v3.10.23`，附件 `MakeYourNotes-v3.10.23.apk`（20 878 472 字节）。
 
 ## 五、文件清单
 
@@ -47,7 +51,8 @@
 | `D:\dshwork\课件知识点助手\README.md` | 使用说明（更新记录已改为摘要 + 指向 CHANGELOG） | 已改 |
 | `D:\dshwork\课件知识点助手\CHANGELOG.md` | 78 个版本的完整更新日志 | 新增 |
 | `D:\dshwork\课件知识点助手\MakeYourNotes-v3.10.23.apk` | 手机本地版安装包（新图标，19.9 MB，未入库） | 已重出 |
-| `D:\dshwork\课件知识点助手\handoff\web-version-handoff.md` | 本文件 | 新增 |
+| `D:\dshwork\课件知识点助手\CHANGELOG.md` | 78 个版本，三段式编号 + 改号对照 | 已重写 |
+| `D:\dshwork\课件知识点助手\handoff\web-version-handoff.md` | 本文件 | 已更新 |
 
 ## 六、约束与红线
 
