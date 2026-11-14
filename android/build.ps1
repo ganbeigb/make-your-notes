@@ -54,7 +54,7 @@ $Abi = 'arm64-v8a'
 $Assets = Join-Path $Work 'assets'
 $Payload = Join-Path $Assets 'app.zip'
 $FinalApk = Join-Path $Build 'CourseNotes.apk'
-$Deliverable = Join-Path $App 'MakeYourNotes-v3.10.23.apk'
+$Deliverable = Join-Path $App ("MakeYourNotes-v" + $VersionName + ".apk")
 
 function Step($m) { Write-Host "`n=== $m ===" -ForegroundColor Cyan }
 function Need($p, $w) { if (-not (Test-Path $p)) { throw "$w not found: $p" } }
