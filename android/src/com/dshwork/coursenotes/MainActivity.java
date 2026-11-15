@@ -26,6 +26,12 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
+import android.animation.PropertyValuesHolder;
+import android.graphics.drawable.GradientDrawable;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ScrollView;
@@ -108,10 +114,9 @@ public class MainActivity extends Activity {
         setContentView(root);
         root.requestApplyInsets();
 
-        showLogScreen();
-        log("课件知识助手 · 手机本地版");
-        log("设备 " + Build.MANUFACTURER + " " + Build.MODEL + " · Android " + Build.VERSION.RELEASE
-                + " (" + Build.SUPPORTED_ABIS[0] + ")");
+        showSplash();
+        android.util.Log.i(TAG, "boot: " + Build.MANUFACTURER + " " + Build.MODEL
+                + " · Android " + Build.VERSION.RELEASE + " (" + Build.SUPPORTED_ABIS[0] + ")");
         new Thread(this::boot, "boot").start();
     }
 
@@ -122,19 +127,21 @@ public class MainActivity extends Activity {
 
         try {
             if (needsUnpack(payload)) {
-                log("首次启动：正在解压应用资源…");
+                android.util.Log.i(TAG, "first launch: unpacking assets…");
                 unpack(payload);
                 writeVersion(payload);
-                log("资源解压完成");
+                android.util.Log.i(TAG, "assets unpacked");
             }
         } catch (Throwable t) {
             log("!! 解压失败：" + t);
+            ui.post(this::showLogScreen);
             return;
         }
 
         final File entry = new File(payload, "server/server.js");
         if (!entry.isFile()) {
             log("!! 找不到入口文件：" + entry);
+            ui.post(this::showLogScreen);
             return;
         }
 
@@ -155,7 +162,7 @@ public class MainActivity extends Activity {
         if (ca.isFile()) setEnv("NODE_EXTRA_CA_CERTS", ca.getAbsolutePath());
 
         NodeRunner.setLogFile(new File(getFilesDir(), "node.log").getAbsolutePath());
-        log("正在启动内置服务…");
+        android.util.Log.i(TAG, "starting embedded node server…");
 
         new Thread(() -> {
             try {
@@ -163,6 +170,7 @@ public class MainActivity extends Activity {
                 log("Node 已退出（code " + code + "）");
             } catch (Throwable t) {
                 log("!! Node 启动失败：" + t);
+                ui.post(this::showLogScreen);
             }
         }, "node").start();
 
@@ -235,7 +243,7 @@ public class MainActivity extends Activity {
                 files++;
             }
         }
-        log("  已解压 " + files + " 个文件");
+        android.util.Log.i(TAG, "unpacked files: " + files);
     }
 
     private static void deleteTree(File f) {
@@ -250,7 +258,7 @@ public class MainActivity extends Activity {
         new Thread(() -> {
             for (int i = 0; i < 120; i++) {
                 if (isServerUp()) {
-                    log("服务就绪 → " + baseUrl);
+                    android.util.Log.i(TAG, "server ready: " + baseUrl);
                     ui.post(this::showWeb);
                     return;
                 }
@@ -263,6 +271,7 @@ public class MainActivity extends Activity {
             log("!! 60 秒内服务没有响应，以下是 Node 的输出：");
             dumpNodeLog();
             log("可以把这张截图发给我。");
+            ui.post(this::showLogScreen);
         }, "poll").start();
     }
 
@@ -307,7 +316,74 @@ public class MainActivity extends Activity {
 
     // ---- 界面 -----------------------------------------------------------------------------------------------
 
+
+    // ---- 启动动画 -------------------------------------------------------------------------------------------
+
+    /** 启动中的最小展示：图标呼吸 + 三点跳动；失败时才切到日志页 */
+    private void showSplash() {
+        root.removeAllViews();
+
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setGravity(Gravity.CENTER);
+
+        ImageView icon = new ImageView(this);
+        icon.setImageResource(R.mipmap.ic_launcher);
+        int size = dp(96);
+        box.addView(icon, new LinearLayout.LayoutParams(size, size));
+
+        // 呼吸：缩放 0.94~1.06 + 透明度 0.8~1.0
+        ObjectAnimator breathe = ObjectAnimator.ofPropertyValuesHolder(icon,
+                PropertyValuesHolder.ofFloat(View.SCALE_X, 0.94f, 1.06f),
+                PropertyValuesHolder.ofFloat(View.SCALE_Y, 0.94f, 1.06f),
+                PropertyValuesHolder.ofFloat(View.ALPHA, 0.82f, 1f));
+        breathe.setDuration(1100);
+        breathe.setRepeatCount(ValueAnimator.INFINITE);
+        breathe.setRepeatMode(ValueAnimator.REVERSE);
+        breathe.start();
+
+        // 三点跳动
+        LinearLayout dots = new LinearLayout(this);
+        dots.setOrientation(LinearLayout.HORIZONTAL);
+        dots.setGravity(Gravity.CENTER);
+        LinearLayout.LayoutParams dotLp = new LinearLayout.LayoutParams(dp(7), dp(7));
+        dotLp.leftMargin = dp(5);
+        dotLp.rightMargin = dp(5);
+        final View[] dotViews = new View[3];
+        for (int i = 0; i < 3; i++) {
+            View dot = new View(this);
+            GradientDrawable d = new GradientDrawable();
+            d.setShape(GradientDrawable.OVAL);
+            d.setColor(Color.parseColor("#2F5D4B"));
+            dot.setBackground(d);
+            dot.setAlpha(0.35f);
+            dotViews[i] = dot;
+            dots.addView(dot, dotLp);
+        }
+        LinearLayout.LayoutParams dotsLp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        dotsLp.topMargin = dp(22);
+        box.addView(dots, dotsLp);
+
+        for (int i = 0; i < 3; i++) {
+            ObjectAnimator fade = ObjectAnimator.ofFloat(dotViews[i], View.ALPHA, 0.25f, 1f);
+            fade.setDuration(520);
+            fade.setStartDelay(i * 170L);
+            fade.setRepeatCount(ValueAnimator.INFINITE);
+            fade.setRepeatMode(ValueAnimator.REVERSE);
+            fade.start();
+        }
+
+        root.addView(box, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+        // 日志视图不显示，但保留引用以便失败时切换
+        logView = new TextView(this);
+    }
+
     private void showLogScreen() {
+        if (logView == null) logView = new TextView(this);
+        logView.setText(logBuf.toString());
         root.removeAllViews();
         ScrollView scroll = new ScrollView(this);
         logView = new TextView(this);
