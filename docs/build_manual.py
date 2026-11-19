@@ -174,10 +174,11 @@ table(doc, [
 p(doc, "本手册用于逐项核对项目结构：第二节给出完整目录树，第三节按编号解释每个文件/目录的职责与核对要点，"
        "第四、五节说明一次请求如何流转与数据如何存放，第八节是可以直接打勾的核对清单。", indent=True)
 
-doc.add_heading("本手册目录", level=2)
+toc_head = doc.add_heading("本手册目录", level=2)
+toc_head.paragraph_format.page_break_before = True
 toc_rows = [
     ["一", "整体结构总览", "四层结构与各自规模"],
-    ["二", "目录树", "完整文件树（ASCII，便于搜索）"],
+    ["二", "目录树（图示）", "上下两张图示 + 矢量源 SVG"],
     ["三", "逐项职责说明", "按 #1–#24 编号逐一解释"],
     ["四", "一次操作怎么走", "8 条主要操作对应的接口与落点"],
     ["五", "数据模型", "data/db.json 的 10 个顶层键"],
@@ -187,8 +188,6 @@ toc_rows = [
     ["九", "常见问题", "6 类典型故障与处理"],
 ]
 table(doc, toc_rows, widths=[1.4, 5.4, 8.8], size=9)
-
-doc.add_page_break()
 
 # ============ 一、总览 ============
 doc.add_heading("一、整体结构总览", level=1)
@@ -203,61 +202,28 @@ table(doc, [
     ["文档", "docs/ · handoff/ · 截图/", "参赛文档、上下文交接、界面截图", "—"],
 ], widths=[1.9, 3.6, 6.2, 5.4])
 
-doc.add_heading("二、目录树（纯 ASCII，可直接搜索文件名）", level=1)
-code(doc, [
-    "kejian-helper/                     (= D:\\dshwork\\课件知识点助手)",
-    "|",
-    "+-- public/                        前端（无框架、无构建）",
-    "|   +-- index.html          1.4K   页面骨架：sidebar / topbar / viewbar / content",
-    "|   +-- app.js            132.5K   视图与业务逻辑（3361 行）",
-    "|   +-- draw.js            91.5K   画板与电路图引擎（2316 行）",
-    "|   +-- symbols.js         15.2K   41 个电路元件符号定义",
-    "|   +-- styles.css         52.4K   全部样式与设计变量（1153 行）",
-    "|   +-- manifest.webmanifest 0.4K  PWA 清单（图标、主题色）",
-    "|   +-- icon-192.png / icon-512.png / favicon.png / favicon-32.png",
-    "|   +-- apple-touch-icon.png",
-    "|   +-- vendor/                   第三方资源（勿改）",
-    "|       +-- katex/                katex.min.js 266K + katex.min.css 24K + fonts/",
-    "|       +-- qrcode/qrcode.js 55K  局域网扫码二维码",
-    "|",
-    "+-- server/                        后端（Node 原生 http）",
-    "|   +-- server.js          98.4K   路由 + 静态服务 + 导出 + 备份（2406 行）",
-    "|   +-- deepseek.js        55.6K   模型调用 + 10 段提示词（1028 行）",
-    "|   +-- store.js            7.4K   数据读写与归一化（238 行）",
-    "|   +-- zip.js              4.0K   手写 zip 打包/解包（113 行）",
-    "|   +-- secret.js           2.3K   API Key / 分享令牌加密（64 行）",
-    "|",
-    "+-- android/                       手机本地版外壳",
-    "|   +-- build.ps1           9.0K   一键打包（187 行）",
-    "|   +-- AndroidManifest.xml 1.6K   版本号、权限、主题",
-    "|   +-- coursenotes.keystore 2.7K  签名证书（务必备份）",
-    "|   +-- jni/node_bridge.cpp 3.6K   JNI：启动内嵌 Node（104 行）",
-    "|   +-- src/com/dshwork/coursenotes/",
-    "|   |   +-- MainActivity.java 25.3K  WebView 外壳 + 启动动画（565 行）",
-    "|   |   +-- NodeRunner.java    0.9K  调 JNI 起 Node（18 行）",
-    "|   +-- res/mipmap-*/ic_launcher.png   5 档图标",
-    "|   +-- assets/cacert.pem   195K   CA 兜底证书",
-    "|",
-    "+-- data/                          运行时生成，已被 .gitignore 排除",
-    "|   +-- db.json                    全部业务数据（见第五节）",
-    "|   +-- images/                    课件原图 + AI 配图",
-    "|   +-- server.pid                 运行中进程号（停止.bat 用）",
-    "|",
-    "+-- docs/                          参赛材料",
-    "|   +-- build_doc.py        29.6K   生成参赛项目文档",
-    "|   +-- 项目文档-*.docx     633K   参赛项目文档",
-    "|   +-- 项目说明手册-*.pdf         本手册",
-    "|",
-    "+-- handoff/web-version-handoff.md 7.1K  跨对话上下文交接（唯一事实来源）",
-    "+-- 截图/                          10 张界面截图",
-    "+-- AGENTS.md              2.2K   给 AI 的项目约定",
-    "+-- CHANGELOG.md          25.9K   79 个版本 + 编号规则 + 旧->新对照",
-    "+-- README.md             31.0K   使用说明",
-    "+-- 可行性评估.md         10.6K   立项时的可行性分析",
-    "+-- 启动.bat / 后台启动.vbs / 停止.bat",
-    "+-- 安装开机自启.bat / 卸载开机自启.bat / 更新仓库.bat",
-    "+-- MakeYourNotes-v2.9.10.apk   20.4M  当前 APK",
-], size=7.4)
+
+doc.add_heading("二、目录树（图示）", level=1)
+p(doc, "下面两张图是同一棵树的上下两部分：矩形是目录或文件，浅绿为目录、米黄为关键文件、白底为普通文件，"
+       "右侧标注规模与职责。矢量源文件为 docs/目录树.svg，位图为 docs/tree-1.png 与 tree-2.png。")
+
+_pic = doc.add_picture(os.path.join(OUT_DIR, "tree-1.png"), width=Cm(17.2))
+doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
+_cap = doc.add_paragraph()
+_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+_r = _cap.add_run("图 1  目录树（一）：项目根 · public/ 前端 · server/ 后端")
+_r.font.size = Pt(8.5)
+_r.font.color.rgb = MUTED
+cn(_r)
+
+_pic2 = doc.add_picture(os.path.join(OUT_DIR, "tree-2.png"), width=Cm(17.2))
+doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
+_cap2 = doc.add_paragraph()
+_cap2.alignment = WD_ALIGN_PARAGRAPH.CENTER
+_r2 = _cap2.add_run("图 2  目录树（二）：android/ 手机外壳 · data/ 数据 · docs/ 文档 · 根目录文件")
+_r2.font.size = Pt(8.5)
+_r2.font.color.rgb = MUTED
+cn(_r2)
 
 # ============ 三、逐项说明 ============
 doc.add_heading("三、逐项职责说明（按编号核对）", level=1)

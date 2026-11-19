@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="798" height="1920" viewBox="0 0 798 1920">
+<rect width="798" height="1920" fill="#faf9f5"/>
+<style>text{font-family:"Microsoft YaHei",sans-serif}</style>
+<g transform="translate(0,0.0)">
+<rect x="34.0" y="34.0" width="372.0" height="32.0" rx="8" fill="#2f5d4b"/>
+<text x="45.0" y="55.0" font-size="15" fill="#ffffff" font-weight="bold">课件知识点助手/</text>
+<text x="422.0" y="54.0" font-size="12" fill="#6e7670">项目根</text>
+<path d="M44.0 56.0 V94.0 H60.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="66.0" y="78.0" width="340.0" height="32.0" rx="8" fill="#e6efe9"/>
+<text x="77.0" y="99.0" font-size="15" fill="#2f5d4b" font-weight="bold">public/</text>
+<text x="422.0" y="98.0" font-size="12" fill="#6e7670">前端 · 无框架</text>
+<path d="M76.0 100.0 V138.0 H92.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="98.0" y="122.0" width="308.0" height="32.0" rx="8" fill="#ffffff" stroke="#cec7b6" stroke-width="1.2"/>
+<text x="109.0" y="143.0" font-size="15" fill="#1f2421">index.html</text>
+<text x="422.0" y="142.0" font-size="12" fill="#6e7670">1.4K  页面骨架</text>
+<path d="M76.0 144.0 V182.0 H92.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="98.0" y="166.0" width="308.0" height="32.0" rx="8" fill="#f8efdf"/>
+<text x="109.0" y="187.0" font-size="15" fill="#785014" font-weight="bold">app.js</text>
+<text x="422.0" y="186.0" font-size="12" fill="#6e7670">132.5K  视图与逻辑 3361 行</text>
+<path d="M76.0 188.0 V226.0 H92.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="98.0" y="210.0" width="308.0" height="32.0" rx="8" fill="#f8efdf"/>
+<text x="109.0" y="231.0" font-size="15" fill="#785014" font-weight="bold">draw.js</text>
+<text x="422.0" y="230.0" font-size="12" fill="#6e7670">91.5K  画板引擎 2316 行</text>
+<path d="M76.0 232.0 V270.0 H92.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="98.0" y="254.0" width="308.0" height="32.0" rx="8" fill="#ffffff" stroke="#cec7b6" stroke-width="1.2"/>
+<text x="109.0" y="275.0" font-size="15" fill="#1f2421">symbols.js</text>
+<text x="422.0" y="274.0" font-size="12" fill="#6e7670">15.2K  41 个元件符号</text>
+<path d="M76.0 276.0 V314.0 H92.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="98.0" y="298.0" width="308.0" height="32.0" rx="8" fill="#ffffff" stroke="#cec7b6" stroke-width="1.2"/>
+<text x="109.0" y="319.0" font-size="15" fill="#1f2421">styles.css</text>
+<text x="422.0" y="318.0" font-size="12" fill="#6e7670">52.4K  样式 1153 行</text>
+<path d="M76.0 320.0 V358.0 H92.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="98.0" y="342.0" width="308.0" height="32.0" rx="8" fill="#ffffff" stroke="#cec7b6" stroke-width="1.2"/>
+<text x="109.0" y="363.0" font-size="15" fill="#1f2421">manifest.webmanifest</text>
+<text x="422.0" y="362.0" font-size="12" fill="#6e7670">0.4K  PWA 清单</text>
+<path d="M76.0 364.0 V402.0 H92.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="98.0" y="386.0" width="308.0" height="32.0" rx="8" fill="#ffffff" stroke="#cec7b6" stroke-width="1.2"/>
+<text x="109.0" y="407.0" font-size="15" fill="#1f2421">icon / favicon（4 张 PNG）</text>
+<text x="422.0" y="406.0" font-size="12" fill="#6e7670">应用图标</text>
+<path d="M76.0 408.0 V446.0 H92.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="98.0" y="430.0" width="308.0" height="32.0" rx="8" fill="#e6efe9"/>
+<text x="109.0" y="451.0" font-size="15" fill="#2f5d4b" font-weight="bold">vendor/</text>
+<text x="422.0" y="450.0" font-size="12" fill="#6e7670">KaTeX + qrcode（勿改）</text>
+<path d="M44.0 452.0 V490.0 H60.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="66.0" y="474.0" width="340.0" height="32.0" rx="8" fill="#e6efe9"/>
+<text x="77.0" y="495.0" font-size="15" fill="#2f5d4b" font-weight="bold">server/</text>
+<text x="422.0" y="494.0" font-size="12" fill="#6e7670">后端 · Node 原生 http</text>
+<path d="M76.0 496.0 V534.0 H92.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="98.0" y="518.0" width="308.0" height="32.0" rx="8" fill="#f8efdf"/>
+<text x="109.0" y="539.0" font-size="15" fill="#785014" font-weight="bold">server.js</text>
+<text x="422.0" y="538.0" font-size="12" fill="#6e7670">98.4K  路由/导出/备份 2406 行</text>
+<path d="M76.0 540.0 V578.0 H92.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="98.0" y="562.0" width="308.0" height="32.0" rx="8" fill="#f8efdf"/>
+<text x="109.0" y="583.0" font-size="15" fill="#785014" font-weight="bold">deepseek.js</text>
+<text x="422.0" y="582.0" font-size="12" fill="#6e7670">55.6K  模型调用 + 10 段提示词</text>
+<path d="M76.0 584.0 V622.0 H92.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="98.0" y="606.0" width="308.0" height="32.0" rx="8" fill="#ffffff" stroke="#cec7b6" stroke-width="1.2"/>
+<text x="109.0" y="627.0" font-size="15" fill="#1f2421">store.js</text>
+<text x="422.0" y="626.0" font-size="12" fill="#6e7670">7.4K  数据读写 238 行</text>
+<path d="M76.0 628.0 V666.0 H92.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="98.0" y="650.0" width="308.0" height="32.0" rx="8" fill="#ffffff" stroke="#cec7b6" stroke-width="1.2"/>
+<text x="109.0" y="671.0" font-size="15" fill="#1f2421">zip.js</text>
+<text x="422.0" y="670.0" font-size="12" fill="#6e7670">4.0K  手写 zip 113 行</text>
+<path d="M76.0 672.0 V710.0 H92.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="98.0" y="694.0" width="308.0" height="32.0" rx="8" fill="#ffffff" stroke="#cec7b6" stroke-width="1.2"/>
+<text x="109.0" y="715.0" font-size="15" fill="#1f2421">secret.js</text>
+<text x="422.0" y="714.0" font-size="12" fill="#6e7670">2.3K  Key / 令牌加密</text>
+</g>
+<g transform="translate(0,814.0)">
+<rect x="34.0" y="34.0" width="372.0" height="32.0" rx="8" fill="#2f5d4b"/>
+<text x="45.0" y="55.0" font-size="15" fill="#ffffff" font-weight="bold">课件知识点助手/（续）</text>
+<path d="M44.0 56.0 V94.0 H60.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="66.0" y="78.0" width="340.0" height="32.0" rx="8" fill="#e6efe9"/>
+<text x="77.0" y="99.0" font-size="15" fill="#2f5d4b" font-weight="bold">android/</text>
+<text x="422.0" y="98.0" font-size="12" fill="#6e7670">手机外壳 · 内嵌 Node</text>
+<path d="M76.0 100.0 V138.0 H92.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="98.0" y="122.0" width="308.0" height="32.0" rx="8" fill="#ffffff" stroke="#cec7b6" stroke-width="1.2"/>
+<text x="109.0" y="143.0" font-size="15" fill="#1f2421">build.ps1</text>
+<text x="422.0" y="142.0" font-size="12" fill="#6e7670">9.0K  一键打包 187 行</text>
+<path d="M76.0 144.0 V182.0 H92.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="98.0" y="166.0" width="308.0" height="32.0" rx="8" fill="#ffffff" stroke="#cec7b6" stroke-width="1.2"/>
+<text x="109.0" y="187.0" font-size="15" fill="#1f2421">AndroidManifest.xml</text>
+<text x="422.0" y="186.0" font-size="12" fill="#6e7670">1.6K  版本 83 / 2.9.10</text>
+<path d="M76.0 188.0 V226.0 H92.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="98.0" y="210.0" width="308.0" height="32.0" rx="8" fill="#ffffff" stroke="#cec7b6" stroke-width="1.2"/>
+<text x="109.0" y="231.0" font-size="15" fill="#1f2421">coursenotes.keystore</text>
+<text x="422.0" y="230.0" font-size="12" fill="#6e7670">2.7K  签名证书（务必备份）</text>
+<path d="M76.0 232.0 V270.0 H92.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="98.0" y="254.0" width="308.0" height="32.0" rx="8" fill="#ffffff" stroke="#cec7b6" stroke-width="1.2"/>
+<text x="109.0" y="275.0" font-size="15" fill="#1f2421">jni / node_bridge.cpp</text>
+<text x="422.0" y="274.0" font-size="12" fill="#6e7670">3.6K  启动 Node 104 行</text>
+<path d="M76.0 276.0 V314.0 H92.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="98.0" y="298.0" width="308.0" height="32.0" rx="8" fill="#f8efdf"/>
+<text x="109.0" y="319.0" font-size="15" fill="#785014" font-weight="bold">src/…/MainActivity.java</text>
+<text x="422.0" y="318.0" font-size="12" fill="#6e7670">25.3K  WebView + 启动动画 565 行</text>
+<path d="M76.0 320.0 V358.0 H92.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="98.0" y="342.0" width="308.0" height="32.0" rx="8" fill="#ffffff" stroke="#cec7b6" stroke-width="1.2"/>
+<text x="109.0" y="363.0" font-size="15" fill="#1f2421">src/…/NodeRunner.java</text>
+<text x="422.0" y="362.0" font-size="12" fill="#6e7670">0.9K  调 JNI 18 行</text>
+<path d="M76.0 364.0 V402.0 H92.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="98.0" y="386.0" width="308.0" height="32.0" rx="8" fill="#e6efe9"/>
+<text x="109.0" y="407.0" font-size="15" fill="#2f5d4b" font-weight="bold">res/mipmap-*/</text>
+<text x="422.0" y="406.0" font-size="12" fill="#6e7670">5 档图标</text>
+<path d="M44.0 408.0 V446.0 H60.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="66.0" y="430.0" width="340.0" height="32.0" rx="8" fill="#e6efe9"/>
+<text x="77.0" y="451.0" font-size="15" fill="#2f5d4b" font-weight="bold">data/</text>
+<text x="422.0" y="450.0" font-size="12" fill="#6e7670">运行时生成 · 已 gitignore</text>
+<path d="M76.0 452.0 V490.0 H92.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="98.0" y="474.0" width="308.0" height="32.0" rx="8" fill="#f8efdf"/>
+<text x="109.0" y="495.0" font-size="15" fill="#785014" font-weight="bold">db.json</text>
+<text x="422.0" y="494.0" font-size="12" fill="#6e7670">全部业务数据（10 个顶层键）</text>
+<path d="M76.0 496.0 V534.0 H92.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="98.0" y="518.0" width="308.0" height="32.0" rx="8" fill="#e6efe9"/>
+<text x="109.0" y="539.0" font-size="15" fill="#2f5d4b" font-weight="bold">images/</text>
+<text x="422.0" y="538.0" font-size="12" fill="#6e7670">课件原图 + AI 配图</text>
+<path d="M76.0 540.0 V578.0 H92.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="98.0" y="562.0" width="308.0" height="32.0" rx="8" fill="#ffffff" stroke="#cec7b6" stroke-width="1.2"/>
+<text x="109.0" y="583.0" font-size="15" fill="#1f2421">server.pid</text>
+<text x="422.0" y="582.0" font-size="12" fill="#6e7670">进程号（停止.bat 用）</text>
+<path d="M44.0 584.0 V622.0 H60.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="66.0" y="606.0" width="340.0" height="32.0" rx="8" fill="#e6efe9"/>
+<text x="77.0" y="627.0" font-size="15" fill="#2f5d4b" font-weight="bold">docs/</text>
+<text x="422.0" y="626.0" font-size="12" fill="#6e7670">参赛材料与手册</text>
+<path d="M76.0 628.0 V666.0 H92.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="98.0" y="650.0" width="308.0" height="32.0" rx="8" fill="#ffffff" stroke="#cec7b6" stroke-width="1.2"/>
+<text x="109.0" y="671.0" font-size="15" fill="#1f2421">项目文档-*.docx</text>
+<text x="422.0" y="670.0" font-size="12" fill="#6e7670">参赛项目文档 633K</text>
+<path d="M76.0 672.0 V710.0 H92.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="98.0" y="694.0" width="308.0" height="32.0" rx="8" fill="#ffffff" stroke="#cec7b6" stroke-width="1.2"/>
+<text x="109.0" y="715.0" font-size="15" fill="#1f2421">项目说明手册-*.pdf</text>
+<text x="422.0" y="714.0" font-size="12" fill="#6e7670">本手册</text>
+<path d="M76.0 716.0 V754.0 H92.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="98.0" y="738.0" width="308.0" height="32.0" rx="8" fill="#ffffff" stroke="#cec7b6" stroke-width="1.2"/>
+<text x="109.0" y="759.0" font-size="15" fill="#1f2421">build_*.py / make_tree.py</text>
+<text x="422.0" y="758.0" font-size="12" fill="#6e7670">生成文档、手册与目录树</text>
+<path d="M44.0 760.0 V798.0 H60.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="66.0" y="782.0" width="340.0" height="32.0" rx="8" fill="#f8efdf"/>
+<text x="77.0" y="803.0" font-size="15" fill="#785014" font-weight="bold">handoff/web-version-handoff.md</text>
+<text x="422.0" y="802.0" font-size="12" fill="#6e7670">上下文交接（唯一事实来源）</text>
+<path d="M44.0 804.0 V842.0 H60.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="66.0" y="826.0" width="340.0" height="32.0" rx="8" fill="#e6efe9"/>
+<text x="77.0" y="847.0" font-size="15" fill="#2f5d4b" font-weight="bold">截图/</text>
+<text x="422.0" y="846.0" font-size="12" fill="#6e7670">10 张界面截图</text>
+<path d="M44.0 848.0 V886.0 H60.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="66.0" y="870.0" width="340.0" height="32.0" rx="8" fill="#ffffff" stroke="#cec7b6" stroke-width="1.2"/>
+<text x="77.0" y="891.0" font-size="15" fill="#1f2421">CHANGELOG.md</text>
+<text x="422.0" y="890.0" font-size="12" fill="#6e7670">79 个版本 + 编号规则</text>
+<path d="M44.0 892.0 V930.0 H60.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="66.0" y="914.0" width="340.0" height="32.0" rx="8" fill="#ffffff" stroke="#cec7b6" stroke-width="1.2"/>
+<text x="77.0" y="935.0" font-size="15" fill="#1f2421">README.md</text>
+<text x="422.0" y="934.0" font-size="12" fill="#6e7670">使用说明 31K</text>
+<path d="M44.0 936.0 V974.0 H60.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="66.0" y="958.0" width="340.0" height="32.0" rx="8" fill="#ffffff" stroke="#cec7b6" stroke-width="1.2"/>
+<text x="77.0" y="979.0" font-size="15" fill="#1f2421">启动.bat / 后台启动.vbs / 停止.bat</text>
+<text x="422.0" y="978.0" font-size="12" fill="#6e7670">启动与停止</text>
+<path d="M44.0 980.0 V1018.0 H60.0" stroke="#cec7b6" stroke-width="1.2" fill="none"/>
+<rect x="66.0" y="1002.0" width="340.0" height="32.0" rx="8" fill="#f8efdf"/>
+<text x="77.0" y="1023.0" font-size="15" fill="#785014" font-weight="bold">MakeYourNotes-v2.9.10.apk</text>
+<text x="422.0" y="1022.0" font-size="12" fill="#6e7670">当前 APK 20.4M</text>
+</g>
+</svg>
