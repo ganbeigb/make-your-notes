@@ -482,10 +482,11 @@ git push
 
 ## 更新记录
 
-完整历史（共 80 个版本，从 v1.0.0 到 v2.9.11）见 **[CHANGELOG.md](CHANGELOG.md)**；主版本只在新增独立页面时升，只有「开辟新能力类型」才走次版本，其余都记在修订号。
+完整历史（共 81 个版本，从 v1.0.0 到 v2.9.12）见 **[CHANGELOG.md](CHANGELOG.md)**；主版本只在新增独立页面时升，只有「开辟新能力类型」才走次版本，其余都记在修订号。
 
 最近几个版本：
 
+- **v2.9.12（versionCode 85）**：修复「装了新版 APK 界面还是旧版」——网页资源解压版本改为跟随 versionName，每次升级都会更新。
 - **v2.9.11（versionCode 84）**：公式不再显示成 x_0 原始写法——正文里的裸 LaTeX 会自动补 `# Make Your Notes
 
 <img src="assets/icon-512.png" width="96" align="right" alt="Make Your Notes 图标" />

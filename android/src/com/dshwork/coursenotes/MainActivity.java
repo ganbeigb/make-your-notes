@@ -63,7 +63,8 @@ public class MainActivity extends Activity {
     private static final String ASSET_ZIP = "app.zip";
     private static final String PAYLOAD_DIR = "app";
     private static final String VERSION_FILE = ".payload-version";
-    private static final String PAYLOAD_VERSION = "1";
+    /** 与 APK 的 versionName 绑定：每次发版都会重新解压网页资源，避免更新后还是旧界面 */
+    private String payloadVersion = "0";
     private static final int REQ_FILE = 1001;
     private static final int MAX_LOG_LINES = 300;
 
@@ -99,6 +100,12 @@ public class MainActivity extends Activity {
         if (Build.VERSION.SDK_INT >= 30) {
             getWindow().setDecorFitsSystemWindows(false);
         }
+
+        try {
+            payloadVersion = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+        } catch (Throwable ignored) {
+        }
+        if (payloadVersion == null || payloadVersion.isEmpty()) payloadVersion = "0";
 
         root = new FrameLayout(this);
         root.setBackgroundColor(Color.parseColor("#F4F1EA"));
@@ -201,7 +208,7 @@ public class MainActivity extends Activity {
         try (InputStream in = new FileInputStream(vf)) {
             byte[] b = new byte[32];
             int n = in.read(b);
-            return n <= 0 || !PAYLOAD_VERSION.equals(new String(b, 0, n).trim());
+            return n <= 0 || !payloadVersion.equals(new String(b, 0, n).trim());
         } catch (Throwable t) {
             return true;
         }
@@ -209,7 +216,7 @@ public class MainActivity extends Activity {
 
     private void writeVersion(File payload) {
         try (OutputStream out = new FileOutputStream(new File(payload, VERSION_FILE))) {
-            out.write(PAYLOAD_VERSION.getBytes());
+            out.write(payloadVersion.getBytes());
         } catch (Throwable ignored) {}
     }
 
