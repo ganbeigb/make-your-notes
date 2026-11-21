@@ -29,8 +29,31 @@ function nl2br(html) {
   return html.replace(/\n/g, '<br>');
 }
 
+
+/** 裸 LaTeX 补 $：模型偶尔把 x_0、\frac{a}{b} 直接写进正文，没有 $ 时 KaTeX 不接管 */
+const MATH_KEEP = /```[\s\S]*?```|`[^`\n]*`|\$\$[\s\S]+?\$\$|\\\[[\s\S]+?\\\]|\\\([\s\S]+?\\\)|\$[^$\n]{1,300}\$/g;
+const MATH_CMD = /\\[a-zA-Z]{2,}(?:\s*\{[^{}\n]{0,40}\}){0,3}/g;
+const MATH_TERM = '[A-Za-z0-9]+(?:(?:[_^])(?:\\{[^{}\\n]{1,24}\\}|[A-Za-z0-9]{1,6}))*';
+const MATH_REL = '\\s*(?:=|≈|≤|≥|<|>|\\+|-|×|·|→)\\s*';
+const MATH_SUBSUP = new RegExp('\\b[A-Za-z](?:[_^](?:\\{[^{}\\n]{1,24}\\}|[A-Za-z0-9]{1,6}))+(?:' + MATH_REL + MATH_TERM + '){0,6}', 'g');
+
+function wrapBareMath(text) {
+  let s = String(text == null ? '' : text);
+  if (!s) return s;
+  if (s.indexOf('_') < 0 && s.indexOf('^') < 0 && s.indexOf('\\') < 0) return s;
+  const keep = [];
+  s = s.replace(MATH_KEEP, (m) => {
+    keep.push(m);
+    return '\u0000' + (keep.length - 1) + '\u0000';
+  });
+  s = s.replace(MATH_CMD, (m) => '$' + m + '$');
+  s = s.replace(MATH_SUBSUP, (m) => '$' + m + '$');
+  s = s.replace(/\u0000(\d+)\u0000/g, (_, i) => keep[Number(i)]);
+  return s;
+}
+
 function renderMath(text) {
-  const raw = String(text ?? '');
+  const raw = wrapBareMath(text);
   if (!window.katex) return nl2br(esc(raw));
   let out = '';
   let last = 0;

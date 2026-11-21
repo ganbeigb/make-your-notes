@@ -305,6 +305,29 @@ function slideDataUrl(slide) {
   return `data:${mime};base64,${buf.toString('base64')}`;
 }
 
+
+/** 裸 LaTeX 补 $：模型偶尔把 x_0、\frac{a}{b} 直接写进正文，没有 $ 时 KaTeX 不接管 */
+const MATH_KEEP = /```[\s\S]*?```|`[^`\n]*`|\$\$[\s\S]+?\$\$|\\\[[\s\S]+?\\\]|\\\([\s\S]+?\\\)|\$[^$\n]{1,300}\$/g;
+const MATH_CMD = /\\[a-zA-Z]{2,}(?:\s*\{[^{}\n]{0,40}\}){0,3}/g;
+const MATH_TERM = '[A-Za-z0-9]+(?:(?:[_^])(?:\\{[^{}\\n]{1,24}\\}|[A-Za-z0-9]{1,6}))*';
+const MATH_REL = '\\s*(?:=|≈|≤|≥|<|>|\\+|-|×|·|→)\\s*';
+const MATH_SUBSUP = new RegExp('\\b[A-Za-z](?:[_^](?:\\{[^{}\\n]{1,24}\\}|[A-Za-z0-9]{1,6}))+(?:' + MATH_REL + MATH_TERM + '){0,6}', 'g');
+
+function wrapBareMath(text) {
+  let s = String(text == null ? '' : text);
+  if (!s) return s;
+  if (s.indexOf('_') < 0 && s.indexOf('^') < 0 && s.indexOf('\\') < 0) return s;
+  const keep = [];
+  s = s.replace(MATH_KEEP, (m) => {
+    keep.push(m);
+    return '\u0000' + (keep.length - 1) + '\u0000';
+  });
+  s = s.replace(MATH_CMD, (m) => '$' + m + '$');
+  s = s.replace(MATH_SUBSUP, (m) => '$' + m + '$');
+  s = s.replace(/\u0000(\d+)\u0000/g, (_, i) => keep[Number(i)]);
+  return s;
+}
+
 function cleanFormulaText(raw) {
   let s = String(raw || '').trim();
   if (!s) return '';
@@ -1629,7 +1652,7 @@ async function handleExportNotesDoc(req, res) {
     g.items.forEach((it, ii) => {
       out.push('<section class="note" id="g' + gi + '-' + ii + '">');
       out.push('<h3>' + escHtml(it.name) + '</h3>');
-      const bodyText = String(it.content || '').trim();
+      const bodyText = wrapBareMath(String(it.content || '').trim());
       if (bodyText) out.push('<div class="body">' + escHtml(bodyText) + '</div>');
       if (it.formula) out.push('<div class="formula">$' + escHtml(it.formula) + '$</div>');
       const img = images[it.id];
@@ -1836,7 +1859,7 @@ function handleExportNotes(req, res, url) {
     const out = [];
     out.push(isHtml ? '<h3>' + escHtml(it.name) + '</h3>' : '### ' + it.name);
     out.push('');
-    const body = String(it.content || '').trim();
+    const body = wrapBareMath(String(it.content || '').trim());
     if (body) out.push(isHtml ? '<div class="body">' + escHtml(body) + '</div>' : body);
     if (it.formula) {
       out.push('');
