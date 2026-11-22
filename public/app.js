@@ -260,9 +260,26 @@ function fracifyMath(text) {
     });
 }
 
+/** 判断 $…$ 里是不是真公式：中文、纯数字（常是金额）、过长的一律不渲染 */
+function looksLikeMath(expr, display) {
+  const t = String(expr == null ? '' : expr).trim();
+  if (!t) return false;
+  if (display) return true;
+  if (t.length > 300) return false;
+  if (/[\u4e00-\u9fa5]/.test(t)) return false;
+  if (/^\d+([.,]\d+)?$/.test(t)) return false;
+  return /[\\^_{}=+\-*/<>≤≥±×·÷∫∑√πθαβγλμσΔ]/.test(t) || /^[A-Za-z][A-Za-z0-9 ]{0,12}$/.test(t);
+}
+
 function renderMath(text) {
-  const raw = wrapBareMath(text);
-  if (!window.katex) return nl2br(esc(raw));
+  const wrapped = wrapBareMath(text);
+  if (!window.katex) return nl2br(esc(wrapped));
+  // 行内代码 `…` 里的内容不参与公式渲染：先挖掉，最后原样填回
+  const codes = [];
+  const raw = wrapped.replace(/`[^`\n]*`/g, (mm) => {
+    codes.push(mm);
+    return '\u0003' + (codes.length - 1) + '\u0003';
+  });
   let out = '';
   let last = 0;
   let m;
@@ -283,6 +300,11 @@ function renderMath(text) {
     } else {
       expr = token.slice(1, -1);
     }
+    if (!looksLikeMath(expr, display)) {
+      out += esc(token);
+      last = m.index + token.length;
+      continue;
+    }
     try {
       out += window.katex.renderToString(slashToFrac(expr), {
         displayMode: display,
@@ -295,6 +317,8 @@ function renderMath(text) {
     last = m.index + token.length;
   }
   out += nl2br(esc(raw.slice(last)));
+  // 还原被保护的行内代码
+  out = out.replace(/\u0003(\d+)\u0003/g, (mm, i) => nl2br(esc(codes[Number(i)])));
   return out;
 }
 
