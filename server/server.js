@@ -328,6 +328,214 @@ function wrapBareMath(text) {
   return s;
 }
 
+/** 把 a/b 显示成上下分式：\frac{a}{b}；实在拆不开的退化为 \div */
+const OPCH = new Set(['+', '-', '=', '<', '>', '≈', '≤', '≥', '−', '×', '·']);
+
+function skipBrace(s, i) {
+  let d = 0;
+  for (; i < s.length; i++) {
+    if (s[i] === '\\') { i++; continue; }
+    if (s[i] === '{') d++;
+    else if (s[i] === '}') { d--; if (d === 0) return i + 1; }
+  }
+  return -1;
+}
+function skipParen(s, i) {
+  const open = s[i], close = open === '(' ? ')' : ']';
+  let d = 0;
+  for (; i < s.length; i++) {
+    if (s[i] === '\\') { i++; continue; }
+    if (s[i] === open) d++;
+    else if (s[i] === close) { d--; if (d === 0) return i + 1; }
+  }
+  return -1;
+}
+
+// 读一个原子（含上下标与相邻括号组）
+function readAtom(s, i) {
+  const start = i;
+  if (s[i] === '{') { const e = skipBrace(s, i); if (e < 0) return -1; i = e; }
+  else if (s[i] === '\\') {
+    i++;
+    while (i < s.length && /[a-zA-Z]/.test(s[i])) i++;
+    while (s[i] === '{') { const e = skipBrace(s, i); if (e < 0) return -1; i = e; }
+    while (s[i] === '[') { const e = skipParen(s, i); if (e < 0) return -1; i = e; }
+  } else if (s[i] === '(' || s[i] === '[') {
+    const e = skipParen(s, i); if (e < 0) return -1; i = e;
+  } else if (/[0-9A-Za-z]/.test(s[i])) {
+    while (i < s.length && /[0-9A-Za-z.]/.test(s[i])) i++;
+  } else return -1;
+
+  // 后缀：上下标、阶乘，以及紧邻的括号组（f^{(k)}(x_0)）
+  let moved = true;
+  while (moved) {
+    moved = false;
+    if (s[i] === '_' || s[i] === '^') {
+      i++;
+      if (s[i] === '{') { const e = skipBrace(s, i); if (e < 0) return -1; i = e; }
+      else if (/[0-9A-Za-z+\-]/.test(s[i] || '')) i++;
+      else return -1;
+      moved = true;
+    } else if (s[i] === '!') { i++; moved = true; }
+    else if (s[i] === '(') { const e = skipParen(s, i); if (e < 0) return -1; i = e; moved = true; }
+  }
+  return i > start ? i : -1;
+}
+
+// 反向读：返回 {start, atom}
+function readAtomBack(s, i) {
+  let end = i;
+  const strip = () => { while (end > 0 && s[end - 1] === ' ') end--; };
+  strip();
+  let guard = 0;
+  let moved = true;
+  while (moved && guard++ < 12) {
+    moved = false;
+    const ch = s[end - 1];
+    if (ch === undefined) break;
+    if (ch === '!') { end--; moved = true; strip(); continue; }
+    if (ch === ')') {
+      let d = 0, j = end - 1;
+      for (; j >= 0; j--) {
+        if (s[j] === '\\') { j--; continue; }
+        if (s[j] === ')') d++;
+        else if (s[j] === '(') { d--; if (d === 0) break; }
+      }
+      if (j < 0) return null;
+      end = j; moved = true; strip(); continue;
+    }
+    if (ch === '}') {
+      let d = 0, j = end - 1;
+      for (; j >= 0; j--) {
+        if (s[j] === '\\') { j--; continue; }
+        if (s[j] === '}') d++;
+        else if (s[j] === '{') { d--; if (d === 0) break; }
+      }
+      if (j < 0) return null;
+      if (j > 0 && (s[j - 1] === '^' || s[j - 1] === '_')) { end = j - 1; moved = true; strip(); continue; }
+      end = j; moved = true; strip(); continue;
+    }
+    if (/[0-9A-Za-z.]/.test(ch)) {
+      let j = end;
+      while (j > 0 && /[0-9A-Za-z.]/.test(s[j - 1])) j--;
+      end = j;
+      if (end > 0 && (s[end - 1] === '^' || s[end - 1] === '_')) { end--; moved = true; strip(); continue; }
+      if (end > 0 && s[end - 1] === '\\') {
+        let k = end - 1;
+        while (k > 0 && /[a-zA-Z]/.test(s[k - 1])) k--;
+        end = k - 1 < 0 ? k : k - 1;
+        end = k - 1; moved = true; strip(); continue;
+      }
+      continue;
+    }
+    if (/[a-zA-Z]/.test(ch)) {
+      let j = end;
+      while (j > 0 && /[a-zA-Z]/.test(s[j - 1])) j--;
+      if (j > 0 && s[j - 1] === '\\') { end = j - 1; moved = true; strip(); continue; }
+      continue;
+    }
+    break;
+  }
+  strip();
+  if (end >= i || end < 0) return null;
+  let atom = s.slice(end, i);
+  let start = end;
+  while (atom.startsWith(' ')) { atom = atom.slice(1); start++; }
+  atom = atom.replace(/\s+$/, '');
+  return { start, atom };
+}
+
+// 顶层按 / 切分
+function splitTop(s) {
+  const parts = [];
+  let depth = 0, cur = '';
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i];
+    if (ch === '\\') { cur += ch + (s[i + 1] || ''); i++; continue; }
+    if (ch === '{') depth++;
+    else if (ch === '}') depth--;
+    if (ch === '/' && depth === 0) { parts.push(cur); cur = ''; continue; }
+    cur += ch;
+  }
+  parts.push(cur);
+  return parts;
+}
+
+function unwrapParens(s) {
+  const t = s.trim();
+  if (t.length > 2 && t[0] === '(' && t[t.length - 1] === ')') {
+    if (skipParen(t, 0) === t.length) return t.slice(1, -1);
+  }
+  return t;
+}
+
+function slashToFrac(expr) {
+  const s = String(expr == null ? '' : expr);
+  if (!s.includes('/')) return s;
+  const parts = splitTop(s);
+  if (parts.length === 1) {
+    return s.replace(/\{([^{}]*)\}/g, (m, inner) => '{' + slashToFrac(inner) + '}');
+  }
+  for (let i = 1; i < parts.length; i++) {
+    if (i === 1) {
+      const back = readAtomBack(parts[0], parts[0].length);
+      if (back) {
+        parts[0] = parts[0].slice(0, back.start) + '\u0001' + back.atom + '\u0001';
+      } else {
+        parts[0] = '\u0001' + parts[0] + '\u0001';
+      }
+    }
+    const lead = (parts[i].match(/^\s*/) || [''])[0];
+    const e = readAtom(parts[i], lead.length);
+    if (e < 0) {
+      parts[i] = lead + '\u0002' + parts[i].slice(lead.length) + '\u0002';
+    } else {
+      parts[i] = lead + '\u0001' + parts[i].slice(lead.length, e) + '\u0001' + parts[i].slice(e);
+    }
+  }
+  // 左折叠
+  let acc = parts[0];
+  for (let i = 1; i < parts.length; i++) {
+    let seg = parts[i];
+    if (seg.includes('\u0002')) {
+      const pre = seg.slice(0, seg.indexOf('\u0002'));
+      const inner = seg.slice(seg.indexOf('\u0002') + 1).replace('\u0002', '');
+      const numMatch = /\u0001([^\u0001]*)\u0001$/.exec(acc);
+      const numerator = numMatch ? numMatch[1] : acc;
+      const head = numMatch ? acc.slice(0, numMatch.index) : '';
+      acc = head + '\\frac{' + slashToFrac(numerator) + '}{' + slashToFrac(inner) + '}' + pre;
+      continue;
+    }
+    const mm = /^([^\u0001]*)\u0001([^\u0001]*)\u0001([^]*)$/.exec(seg);
+    const lead = ''; // 分母前导空格丢弃，避免分式前多一个空格
+    const denRaw = mm ? mm[2] : '';
+    const post = mm ? mm[3] : seg;
+    const numMatch = /\u0001([^\u0001]*)\u0001$/.exec(acc);
+    const numerator = numMatch ? numMatch[1] : acc;
+    const head = numMatch ? acc.slice(0, numMatch.index) : '';
+    acc = head + lead + '\\frac{' + slashToFrac(unwrapParens(numerator)) + '}{' + slashToFrac(unwrapParens(denRaw)) + '}' + slashToFrac(post);
+  }
+  return acc.replace(/[\u0001\u0002]/g, '');
+}
+
+
+/** 只处理 $…$ / $$…$$ 里的内容 */
+function fracifyMath(text) {
+  const s = String(text == null ? '' : text);
+  if (!s || s.indexOf('/') < 0) return s;
+  return s.replace(/\$\$([\s\S]+?)\$\$|\$([^$\n]{1,400})\$|\\\[([\s\S]+?)\\\]|\\\(([\s\S]+?)\\\)/g,
+    (m, d, i, dd, ii) => {
+      try {
+        if (d !== undefined) return '$$' + slashToFrac(d) + '$$';
+        if (i !== undefined) return '$' + slashToFrac(i) + '$';
+        if (dd !== undefined) return '\\[' + slashToFrac(dd) + '\\]';
+        return '\\(' + slashToFrac(ii) + '\\)';
+      } catch (e) {
+        return m;
+      }
+    });
+}
+
 function cleanFormulaText(raw) {
   let s = String(raw || '').trim();
   if (!s) return '';
@@ -1652,9 +1860,9 @@ async function handleExportNotesDoc(req, res) {
     g.items.forEach((it, ii) => {
       out.push('<section class="note" id="g' + gi + '-' + ii + '">');
       out.push('<h3>' + escHtml(it.name) + '</h3>');
-      const bodyText = wrapBareMath(String(it.content || '').trim());
+      const bodyText = fracifyMath(wrapBareMath(String(it.content || '').trim()));
       if (bodyText) out.push('<div class="body">' + escHtml(bodyText) + '</div>');
-      if (it.formula) out.push('<div class="formula">$' + escHtml(it.formula) + '$</div>');
+      if (it.formula) out.push('<div class="formula">$' + escHtml(slashToFrac(it.formula)) + '$</div>');
       const img = images[it.id];
       if (img && /^data:image\/png;base64,/.test(img)) {
         out.push('<figure><img alt="配图" src="' + img + '"><figcaption>AI 生成配图，细节请对照正文核对</figcaption></figure>');
