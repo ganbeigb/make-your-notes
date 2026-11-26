@@ -11,7 +11,7 @@
 
 ## 二、当前状态
 
-- 已完成：功能完整可用，当前版本 `v2.9.15`（APK versionCode 88）。共 78 个历史版本，已按变更大小重排为 v1.0.0 → v2.9.9（CHANGELOG 附逐条对照）
+- 已完成：功能完整可用，当前版本 `v2.10.0`（APK versionCode 89）。共 78 个历史版本，已按变更大小重排为 v1.0.0 → v2.9.9（CHANGELOG 附逐条对照）
 - 已发布：GitHub Release `v2.9.9` 挂了 APK 附件。
 - 仓库：`https://github.com/ganbeigb/make-your-notes`（public，main + 78 tag 已同步）。
 - 进行中：无。远端 `ganbeigb/make-your-notes` 已建（public），main 与 78 个 tag 已推送；APK 已用新图标重出。

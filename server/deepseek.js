@@ -1142,8 +1142,103 @@ async function extensionTitles({ settings, apiKey, subject, items }) {
   return { titles, usage: normalizeUsage(data.usage, settings, textModelOf(settings)) };
 }
 
+
+const PRACTICE_SYSTEM = `你是这门课的经验助教。用户会给你一个科目的全部笔记摘要（分类、知识点名称、重要度、页面覆盖情况）以及他希望的练习方式。
+请完成两件事，并只输出一个 JSON 对象：
+
+1. 推测学习进度 progress：根据知识点覆盖了哪些分类、哪些分类还很空、页面覆盖比例来判断。
+   - level：从「刚起步 / 已过一半 / 接近完成 / 已系统掌握」里选一个
+   - summary：一句话说明依据（提到具体分类与条数）
+   - weak：最多 3 条，最需要补的分类或知识点（用笔记里的真实名称）
+   - suggest：一句话给下一步该怎么复习
+2. 生成练习题 questions：按用户要求的题量出题，优先覆盖 weak 与重要度高的知识点；题型在「选择 / 填空 / 计算 / 简答」中按内容选择。
+   - question：题干完整可独立作答（需要数据时自己给具体数值）
+   - answer：标准答案（简洁、可直接对照）
+   - explain：解析，说明步骤与易错点
+   - ref：对应笔记里哪个知识点（照抄笔记里的名称）
+
+要求：
+- 只考笔记里出现过的内容，不要编造课程外的知识。
+- 数学表达式用 LaTeX，行内 $...$，独立公式 $$...$$。
+- 不重复出同一考点的题；难度从易到难排列。
+- 中文输出；只输出 JSON，不要 Markdown 代码块。`;
+
+/** 根据科目笔记推测进度并出练习题 */
+async function practiceSet({ settings, apiKey, subject, digest, extra, count }) {
+  const n = Math.max(1, Math.min(50, Number(count) || 15));
+  if (settings.mock) {
+    return {
+      progress: {
+        level: '已过一半',
+        summary: `（演示）共 ${digest.itemCount} 条笔记、覆盖 ${digest.categoryCount} 个分类；接入 API 后会给出真实判断。`,
+        weak: ['演示模式：这里会列出最需要补的分类'],
+        suggest: '先补齐覆盖较少的分类，再做题巩固。',
+      },
+      questions: Array.from({ length: Math.min(n, 3) }, (_, i) => ({
+        type: '简答',
+        question: `（演示题目 ${i + 1}）请解释你笔记中“${digest.sampleNames[i] || '某个知识点'}”的含义。`,
+        answer: '演示答案：接入 API 后这里是对应标准答案。',
+        explain: '演示解析。',
+        ref: digest.sampleNames[i] || '示例知识点',
+      })),
+      usage: { prompt: 0, completion: 0, cached: 0, tokens: 0, costCny: 0 },
+    };
+  }
+
+  const user = [
+    `科目：${subject.name}`,
+    subject.criteria ? `学生的分类标准：${subject.criteria}` : '',
+    `笔记规模：${digest.itemCount} 条知识点，${digest.categoryCount} 个分类，课程共 ${digest.slideCount} 页，其中 ${digest.coveredSlides} 页已有笔记`,
+    '',
+    '笔记清单（分类 / 知识点（重要度，是否拓展））：',
+    digest.text,
+    '',
+    `题量：${n} 题`,
+    extra ? `额外要求：${extra}` : '额外要求：无',
+    '',
+    '请输出 JSON：{"progress":{"level":"","summary":"","weak":[],"suggest":""},"questions":[{"type":"","question":"","answer":"","explain":"","ref":""}]}',
+  ].filter(Boolean).join('\n');
+
+  const payload = {
+    model: textModelOf(settings),
+    messages: [
+      { role: 'system', content: PRACTICE_SYSTEM },
+      { role: 'user', content: user },
+    ],
+    response_format: { type: 'json_object' },
+    max_tokens: Math.min(8000, 1200 + n * 220),
+    temperature: 0.5,
+    stream: false,
+  };
+  applyReasoning(payload, settings);
+
+  const data = await chatJson(settings, apiKey, payload);
+  const parsed = parseJsonLoose(data?.choices?.[0]?.message?.content || '') || {};
+  const pr = parsed.progress && typeof parsed.progress === 'object' ? parsed.progress : {};
+  const progress = {
+    level: str(pr.level, 40) || '未知',
+    summary: str(pr.summary, 300),
+    weak: Array.isArray(pr.weak) ? pr.weak.map((x) => str(x, 60)).filter(Boolean).slice(0, 3) : [],
+    suggest: str(pr.suggest, 200),
+  };
+  const raw = Array.isArray(parsed.questions) ? parsed.questions : [];
+  const questions = raw
+    .map((q) => ({
+      type: str(q.type, 8) || '简答',
+      question: str(q.question, 1500),
+      answer: str(q.answer, 1500),
+      explain: str(q.explain, 1000),
+      ref: str(q.ref, 80),
+    }))
+    .filter((q) => q.question)
+    .slice(0, n);
+  if (!questions.length) throw new Error('模型没有返回题目，请重试');
+  return { progress, questions, usage: normalizeUsage(data.usage, settings, textModelOf(settings)) };
+}
+
 module.exports = {
   extractSlide,
+  practiceSet,
   organize,
   refine,
   compose,

@@ -1081,6 +1081,7 @@ function renderModal() {
     attachNoteHandlers();
   } else if (ui.modal.type === 'criteria') box.innerHTML = criteriaModal();
   else if (ui.modal.type === 'usage') box.innerHTML = usageModal();
+  else if (ui.modal.type === 'practice') box.innerHTML = practiceModal();
   else if (ui.modal.type === 'mindmap') {
     box.innerHTML = mindmapModal();
     renderMindmap();
@@ -1151,6 +1152,7 @@ function moreSheet() {
         <button data-act="toggle-strict">${icon('spark')} 严格校对：${S.settings.strictVerify ? '已开' : '已关'}</button>
         <button data-act="organize">${icon('tree')} 自动整理目录</button>
         <button data-act="mm-subject">${icon('tree')} 思维导图</button>
+        <button data-act="open-practice">${icon('spark')} 练习题（推测进度）</button>
         <button data-act="open-criteria">${icon('file')} 分类标准</button>
         <button data-act="open-usage">${icon('download')} 用量与花费</button>
         <button data-act="export-md">${icon('file')} 导出 Markdown</button>
@@ -1167,6 +1169,120 @@ function moreSheet() {
       </div>
       <button class="sheet-cancel" data-act="close-modal">取消</button>
     </div>`;
+}
+
+
+/* ---------------- 练习题：推测进度 → 出题 → 下载题目/答案 PDF ---------------- */
+
+function practiceState() {
+  if (!ui.practice) ui.practice = { loading: false, data: null, error: '' };
+  return ui.practice;
+}
+
+function practiceModal() {
+  const st = practiceState();
+  const sub = currentSubject();
+  const data = st.data;
+  const count = st.count || 15;
+  const extra = st.extra || '';
+
+  const progress = data
+    ? `
+      <div class="practice-progress">
+        <div class="pp-level">学习进度推测：${esc(data.progress?.level || '')}</div>
+        ${data.progress?.summary ? `<div class="pp-line">${esc(data.progress.summary)}</div>` : ''}
+        ${data.progress?.weak?.length ? `<div class="pp-line">建议重点：${data.progress.weak.map((x) => esc(x)).join('、')}</div>` : ''}
+        ${data.progress?.suggest ? `<div class="pp-line">下一步：${esc(data.progress.suggest)}</div>` : ''}
+      </div>`
+    : '';
+
+  const list = data
+    ? `<div class="practice-list">
+        ${data.questions
+          .map(
+            (q, i) => `
+          <div class="practice-q">
+            <div class="pq-head"><span class="pq-no">${i + 1}</span><span class="pq-type">${esc(q.type || '')}</span></div>
+            <div class="pq-body">${renderMath(q.question)}</div>
+            <details class="pq-ans"><summary>答案与解析</summary>
+              <div class="pq-a">${renderMath(q.answer)}</div>
+              ${q.explain ? `<div class="pq-e">${renderMath(q.explain)}</div>` : ''}
+              ${q.ref ? `<div class="pq-ref">对应知识点：${esc(q.ref)}</div>` : ''}
+            </details>
+          </div>`
+          )
+          .join('')}
+      </div>
+      <div class="practice-download">
+        <a class="btn primary" href="/api/practice/pdf?token=${encodeURIComponent(data.token)}&kind=questions" target="_blank">下载题目 PDF</a>
+        <a class="btn" href="/api/practice/pdf?token=${encodeURIComponent(data.token)}&kind=answers" target="_blank">下载答案 PDF</a>
+        <span class="hint">电脑端直接下载 PDF；手机端会在浏览器里打开可打印页面，用「发送到打印 → 存为 PDF」即可</span>
+      </div>`
+    : '';
+
+  return `
+    <div class="panel practice-panel">
+      <div class="panel-head">
+        <div>
+          <h2>练习题</h2>
+          <div class="sub">按当前科目已有的笔记推测进度，再据此出题；生成后可以下载题目与答案两个 PDF</div>
+        </div>
+        <div class="actions"><button class="btn sm ghost" data-act="close-modal">${icon('close')}</button></div>
+      </div>
+      <div class="panel-body">
+        <div class="row2">
+          <div class="field">
+            <label>题量</label>
+            <select class="input" id="practice-count">
+              ${[10, 15, 20, 30]
+                .map((n) => `<option value="${n}" ${n === count ? 'selected' : ''}>${n} 题</option>`)
+                .join('')}
+            </select>
+          </div>
+          <div class="field">
+            <label>科目</label>
+            <div class="input" style="display:flex;align-items:center">${esc(sub?.name || '未选择科目')} · ${esc(String(S.items.filter((i) => i.subjectId === sub?.id).length))} 条笔记</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>额外要求 <span class="hint-inline">可选，例如「多考计算题」「只考第 3–5 章」「难度偏难」</span></label>
+          <textarea class="input" id="practice-extra" rows="2" placeholder="留空则按笔记覆盖情况自动安排">${esc(extra)}</textarea>
+        </div>
+        <div class="ask-actions">
+          <button class="btn" data-act="close-modal">取消</button>
+          <button class="btn primary" data-act="practice-generate" ${st.loading ? 'disabled' : ''}>${st.loading ? '正在生成…' : data ? '重新生成' : '生成练习题'}</button>
+        </div>
+        ${st.error ? `<div class="hint" style="color:#a2453a;margin-top:8px">${esc(st.error)}</div>` : ''}
+        ${progress}
+        ${list}
+      </div>
+    </div>`;
+}
+
+async function generatePractice() {
+  const st = practiceState();
+  const sub = currentSubject();
+  if (!sub) return toast('请先选择科目', 'err');
+  st.count = Number($('#practice-count')?.value) || 15;
+  st.extra = ($('#practice-extra')?.value || '').trim();
+  st.loading = true;
+  st.error = '';
+  renderModal();
+  try {
+    const res = await api('/api/practice', {
+      subjectId: sub.id,
+      count: st.count,
+      extra: st.extra,
+    });
+    st.data = res;
+    renderModal();
+    toast('已生成 ' + (res.questions?.length || 0) + ' 道题');
+  } catch (e) {
+    st.error = e.message || '生成失败';
+    renderModal();
+  } finally {
+    st.loading = false;
+  }
 }
 
 function refineModal(id, scope) {
@@ -3719,6 +3835,11 @@ document.addEventListener('click', async (e) => {
       return openModal('criteria');
     case 'save-criteria':
       return saveCriteria();
+    case 'open-practice':
+      ui.practice = ui.practice || { loading: false, data: null, error: '' };
+      return openModal('practice');
+    case 'practice-generate':
+      return generatePractice();
     case 'open-usage':
       return openModal('usage');
     case 'mm-subject':

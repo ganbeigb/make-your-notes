@@ -1819,6 +1819,220 @@ function katexInline() {
 }
 
 /** 生成带目录、带图片的学习笔记 HTML */
+
+/* ------------------------------------------------------------------ */
+/* 练习题：按科目笔记推测进度 → 出题 → 生成题目 PDF / 答案 PDF          */
+/* ------------------------------------------------------------------ */
+
+const PRACTICE = new Map(); // token -> { subject, progress, questions, at }
+
+/** 把科目笔记压成给模型的摘要 */
+function practiceDigest(subjectId) {
+  const db = store.get();
+  const subject = db.subjects.find((s) => s.id === subjectId);
+  if (!subject) return null;
+  const items = db.items.filter((i) => i.subjectId === subjectId);
+  const cats = db.categories.filter((c) => c.subjectId === subjectId);
+  const slides = db.slides.filter((s) => s.subjectId === subjectId);
+
+  const catName = new Map(cats.map((c) => [c.id, c.name]));
+  const byCat = new Map();
+  for (const it of items) {
+    const key = it.categoryId || '';
+    if (!byCat.has(key)) byCat.set(key, []);
+    byCat.get(key).push(it);
+  }
+  const coveredSlides = new Set(items.map((i) => i.slideId).filter(Boolean)).size;
+
+  const lines = [];
+  for (const [cid, list] of byCat) {
+    const name = cid ? (catName.get(cid) || '未命名分类') : '未归类';
+    lines.push(`【${name}】共 ${list.length} 条`);
+    const sorted = list.slice().sort((a, b) => (b.importance || 0) - (a.importance || 0)).slice(0, 40);
+    for (const it of sorted) {
+      const tag = it.kind === 'extension' ? '，拓展' : '';
+      lines.push(`- ${it.name}（${it.importance || 3}${tag}）`);
+    }
+    if (list.length > sorted.length) lines.push(`- …另有 ${list.length - sorted.length} 条`);
+  }
+  if (!items.length) lines.push('（这个科目还没有任何笔记）');
+
+  let text = lines.join('\n');
+  if (text.length > 7000) text = text.slice(0, 7000) + '\n…（已截断）';
+
+  return {
+    subject,
+    text,
+    itemCount: items.length,
+    categoryCount: byCat.size,
+    slideCount: slides.length,
+    coveredSlides,
+    sampleNames: items.slice(0, 5).map((i) => i.name),
+  };
+}
+
+async function handlePractice(req, res) {
+  const body = await readJson(req);
+  const digest = practiceDigest(String(body.subjectId || ''));
+  if (!digest) return fail(res, 404, '科目不存在');
+  if (!digest.itemCount) return fail(res, 400, '这个科目还没有笔记，先上传课件或手动写几条');
+  const st = store.get();
+  if (!store.getApiKey() && !st.settings.mock) return fail(res, 400, '还没有设置 API Key（设置里可先开演示模式）');
+
+  const extra = String(body.extra || '').slice(0, 500);
+  const count = Math.max(1, Math.min(50, Number(body.count) || 15));
+  let out;
+  try {
+    out = await ds.practiceSet({
+      settings: st.settings,
+      apiKey: store.getApiKey(),
+      subject: digest.subject,
+      digest,
+      extra,
+      count,
+    });
+  } catch (e) {
+    return fail(res, 502, e.message || '出题失败');
+  }
+  if (out.usage && out.usage.tokens) {
+    store.addUsage(out.usage, { kind: 'practice', subjectId: digest.subject.id });
+  }
+
+  const token = crypto.randomBytes(8).toString('hex');
+  PRACTICE.set(token, {
+    subject: digest.subject,
+    progress: out.progress,
+    questions: out.questions,
+    at: Date.now(),
+  });
+  // 清理超过 2 小时的缓存
+  const now = Date.now();
+  for (const [k, v] of PRACTICE) if (now - v.at > 2 * 3600 * 1000) PRACTICE.delete(k);
+
+  send(res, 200, { progress: out.progress, questions: out.questions, token });
+}
+
+/** 题目/答案 PDF 的 HTML（打印友好，A4） */
+function practiceHtml(rec, kind) {
+  const isAnswer = kind === 'answers';
+  const title = rec.subject.name + (isAnswer ? ' · 练习题参考答案' : ' · 练习题');
+  const rows = rec.questions.map((q, i) => {
+    const head = `<div class="q"><div class="qh"><span class="no">${i + 1}</span><span class="type">${escHtml(q.type || '')}</span></div><div class="body">${renderMathText(q.question)}</div>`;
+    if (!isAnswer) return head + '<div class="blank"></div></div>';
+    return head + `<div class="ans"><b>答案：</b>${renderMathText(q.answer)}</div>`
+      + (q.explain ? `<div class="exp"><b>解析：</b>${renderMathText(q.explain)}</div>` : '')
+      + (q.ref ? `<div class="ref">对应知识点：${escHtml(q.ref)}</div>` : '') + '</div>';
+  }).join('');
+
+  const prog = rec.progress || {};
+  const progressBlock = isAnswer ? '' : `
+    <div class="prog">
+      <div class="pt">学习进度推测：${escHtml(prog.level || '')}</div>
+      ${prog.summary ? `<div>${escHtml(prog.summary)}</div>` : ''}
+      ${Array.isArray(prog.weak) && prog.weak.length ? `<div>建议重点：${prog.weak.map(escHtml).join('、')}</div>` : ''}
+      ${prog.suggest ? `<div>复习建议：${escHtml(prog.suggest)}</div>` : ''}
+    </div>`;
+
+  return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>${escHtml(title)}</title>
+<style>
+@page { size: A4; margin: 16mm 15mm; }
+body { font-family: "Microsoft YaHei", sans-serif; font-size: 10.5pt; line-height: 1.75; color: #1f2421; }
+h1 { font-size: 17pt; color: #2f5d4b; margin: 0 0 2mm; }
+.meta { color: #6e7670; font-size: 9pt; margin-bottom: 6mm; }
+.prog { border: 1px solid #cec7b6; border-radius: 3mm; padding: 3mm 4mm; margin-bottom: 6mm; background: #faf9f5; font-size: 9.5pt; }
+.prog .pt { font-weight: 700; color: #2f5d4b; margin-bottom: 1.5mm; }
+.q { margin-bottom: 6mm; page-break-inside: avoid; }
+.qh { display: flex; align-items: center; gap: 2mm; margin-bottom: 1.5mm; }
+.no { display: inline-block; min-width: 7mm; height: 7mm; line-height: 7mm; text-align: center; border-radius: 50%;
+      background: #e6efe9; color: #2f5d4b; font-weight: 700; font-size: 9.5pt; }
+.type { font-size: 9pt; color: #6e7670; }
+.body { font-size: 10.5pt; }
+.blank { height: 28mm; border-bottom: 1px dashed #d6ccb6; margin-top: 2mm; }
+.ans, .exp { margin-top: 1.5mm; }
+.ref { color: #6e7670; font-size: 9pt; margin-top: 1mm; }
+.page-break { page-break-before: always; }
+</style></head><body>
+<h1>${escHtml(title)}</h1>
+<div class="meta">${escHtml(rec.subject.name)} · 共 ${rec.questions.length} 题 · 生成于 ${new Date().toLocaleString('zh-CN')}</div>
+${progressBlock}
+${rows}
+<script>${katexInline().js}<\/script>
+<script>${katexInline().auto}<\/script>
+</body></html>`;
+}
+
+/** 正文里的 $…$ 先做分式化，再交给前端 KaTeX 自动渲染 */
+function renderMathText(s) {
+  return escHtml(fracifyMath(wrapBareMath(String(s || '')))).replace(/\n/g, '<br>');
+}
+
+/** 找本机可用的 Edge / Chrome，用它把 HTML 打成 PDF */
+function browserForPdf() {
+  const cands = [
+    'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+    'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
+    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+  ];
+  for (const p of cands) {
+    try { if (fs.existsSync(p)) return p; } catch {}
+  }
+  return null;
+}
+
+function htmlToPdf(html) {
+  return new Promise((resolve) => {
+    const exe = browserForPdf();
+    if (!exe) return resolve(null);
+    const dir = os.tmpdir();
+    const tag = 'mynotes-' + crypto.randomBytes(6).toString('hex');
+    const htmlPath = path.join(dir, tag + '.html');
+    const pdfPath = path.join(dir, tag + '.pdf');
+    try {
+      fs.writeFileSync(htmlPath, html, 'utf8');
+    } catch (e) {
+      return resolve(null);
+    }
+    const args = ['--headless=new', '--disable-gpu', '--no-pdf-header-footer',
+      '--print-to-pdf=' + pdfPath, 'file:///' + htmlPath.replace(/\\/g, '/')];
+    const child = spawn(exe, args, { stdio: 'ignore' });
+    const timer = setTimeout(() => { try { child.kill(); } catch {} }, 60000);
+    child.on('exit', () => {
+      clearTimeout(timer);
+      let buf = null;
+      try { buf = fs.readFileSync(pdfPath); } catch {}
+      try { fs.unlinkSync(htmlPath); } catch {}
+      try { fs.unlinkSync(pdfPath); } catch {}
+      resolve(buf && buf.length > 1000 ? buf : null);
+    });
+    child.on('error', () => { clearTimeout(timer); resolve(null); });
+  });
+}
+
+async function handlePracticePdf(req, res, url) {
+  const rec = PRACTICE.get(url.searchParams.get('token') || '');
+  if (!rec) return fail(res, 404, '练习题已过期，请重新生成');
+  const kind = url.searchParams.get('kind') === 'answers' ? 'answers' : 'questions';
+  const html = practiceHtml(rec, kind);
+  const pdf = await htmlToPdf(html);
+  const base = rec.subject.name + '-' + (kind === 'answers' ? '答案' : '练习题');
+  if (!pdf) {
+    // 没有可用的浏览器：直接返回 HTML，让用户在浏览器里「打印 / 存为 PDF」
+    res.writeHead(200, {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Content-Disposition': "inline; filename*=UTF-8''" + encodeURIComponent(base + '.html'),
+    });
+    return res.end(html);
+  }
+  res.writeHead(200, {
+    'Content-Type': 'application/pdf',
+    'Content-Length': pdf.length,
+    'Content-Disposition': "attachment; filename*=UTF-8''" + encodeURIComponent(base + '.pdf'),
+    'Cache-Control': 'no-store',
+  });
+  res.end(pdf);
+}
+
 async function handleExportNotesDoc(req, res) {
   const body = await readJson(req);
   const db = store.get();
@@ -2772,6 +2986,8 @@ async function route(req, res) {
   if (m === 'GET' && p === '/api/export-formulas') return handleExportFormulas(req, res, url);
   if (m === 'GET' && p === '/api/export-notes') return handleExportNotes(req, res, url);
   if (m === 'POST' && p === '/api/export-map') return handleExportMapPost(req, res);
+  if (m === 'POST' && p === '/api/practice') return handlePractice(req, res);
+  if (m === 'GET' && p === '/api/practice/pdf') return handlePracticePdf(req, res, url);
   if (m === 'POST' && p === '/api/export-notes-doc') return handleExportNotesDoc(req, res);
   if (m === 'GET' && p === '/api/export-notes-doc') return handleExportNotesDocGet(req, res, url);
   if (m === 'GET' && p === '/api/export-map') return handleExportMapGet(req, res, url);
