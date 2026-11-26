@@ -725,7 +725,7 @@ function itemCard(it) {
           picking
             ? ''
             : `<span class="acts">
-                 ${it.manual ? `<button data-act="edit-note" data-id="${it.id}" title="编辑这条笔记">${icon('edit')}</button>` : ''}
+                 <button data-act="edit-note" data-id="${it.id}" title="手动编辑这条（不走 AI）">${icon('edit')}</button>
                  <button data-act="refine-item" data-id="${it.id}" title="让 AI 修改或补充">${icon('spark')}</button>
                  <button data-act="delete-item" data-id="${it.id}" title="删除这条">${icon('trash')}</button>
                </span>`
@@ -1479,6 +1479,16 @@ function noteModal() {
           <label>标签</label>
           <input class="input" id="note-tags" value="${esc((it?.tags || []).join(', '))}" placeholder="可选，逗号分隔" />
         </div>
+        <div class="field">
+          <label>分类 <span class="hint-inline">手动归到某个目录，不改动 AI 整理结果的其他条目</span></label>
+          <select class="input" id="note-category">
+            <option value="">未分类</option>
+            ${(S.categories || [])
+              .filter((c) => !sub || c.subjectId === sub.id)
+              .map((c) => `<option value="${c.id}" ${it?.categoryId === c.id ? 'selected' : ''}>${esc(c.name)}</option>`)
+              .join('')}
+          </select>
+        </div>
         <div class="note-where">
           ${slide ? `归属：${esc(deck?.title || '')} · 第 ${slide.index} 页` : `归属：${esc(sub?.name || '')} · 不关联具体页面`}
         </div>
@@ -1753,11 +1763,15 @@ async function saveNote() {
   let tags = $('#note-tags')?.value || '';
   if (ui.note?.svgHand && ui.note?.svg && !tags.includes('手绘')) tags = (tags ? tags + ',' : '') + '手绘';
   const formula = ($('#note-formula')?.value || '').trim();
+  const categoryEl = $('#note-category');
+  const categoryId = categoryEl ? (categoryEl.value || null) : undefined;
   const editing = ui.note?.item;
 
   try {
     if (editing) {
-      S = await api(`/api/items/${editing.id}`, { name, content, kind, importance, tags, formula, svg: ui.note?.svg || '', draw: ui.note?.draw || '' }, 'PATCH');
+      const patch = { name, content, kind, importance, tags, formula, svg: ui.note?.svg || '', draw: ui.note?.draw || '' };
+      if (categoryId !== undefined) patch.categoryId = categoryId;
+      S = await api(`/api/items/${editing.id}`, patch, 'PATCH');
       closeModal();
       render();
       toast('已保存');
@@ -1771,6 +1785,7 @@ async function saveNote() {
         importance,
         tags,
         formula,
+        categoryId: categoryId || null,
         svg: ui.note?.svg || '',
         draw: ui.note?.draw || '',
       });
@@ -2519,7 +2534,7 @@ function itemModal(id) {
             : `<span class="hint">这条是手动笔记，没有关联的原页面</span>`
         }
         <span class="spacer"></span>
-        ${it.manual ? `<button class="btn" data-act="edit-note" data-id="${it.id}">${icon('edit')} 编辑内容</button>` : ''}
+        <button class="btn" data-act="edit-note" data-id="${it.id}">${icon('edit')} 手动编辑</button>
         <button class="btn" data-act="refine-item" data-id="${it.id}">${icon('spark')} AI 修改这条</button>
       </div>
     </div>`;
