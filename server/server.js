@@ -1831,7 +1831,6 @@ function katexInline() {
 /* 练习题：按科目笔记推测进度 → 出题 → 生成题目 PDF / 答案 PDF          */
 /* ------------------------------------------------------------------ */
 
-const PRACTICE = new Map(); // token -> { subject, progress, questions, at }
 
 /** 把科目笔记压成给模型的摘要 */
 function practiceDigest(subjectId) {
@@ -1905,156 +1904,7 @@ async function handlePractice(req, res) {
     store.addUsage(out.usage, { kind: 'practice', subjectId: digest.subject.id });
   }
 
-  const token = crypto.randomBytes(8).toString('hex');
-  PRACTICE.set(token, {
-    subject: digest.subject,
-    progress: out.progress,
-    questions: out.questions,
-    at: Date.now(),
-  });
-  // 清理超过 2 小时的缓存
-  const now = Date.now();
-  for (const [k, v] of PRACTICE) if (now - v.at > 2 * 3600 * 1000) PRACTICE.delete(k);
-
-  send(res, 200, { progress: out.progress, questions: out.questions, token });
-}
-
-/** 题目/答案 PDF 的 HTML（打印友好，A4） */
-function practiceHtml(rec, kind) {
-  const isAnswer = kind === 'answers';
-  const title = rec.subject.name + (isAnswer ? ' · 练习题参考答案' : ' · 练习题');
-  const rows = rec.questions.map((q, i) => {
-    const head = `<div class="q"><div class="qh"><span class="no">${i + 1}</span><span class="type">${escHtml(q.type || '')}</span></div><div class="body">${renderMathText(q.question)}</div>`;
-    if (!isAnswer) return head + '<div class="blank"></div></div>';
-    return head + `<div class="ans"><b>答案：</b>${renderMathText(q.answer)}</div>`
-      + `<div class="exp"><b>解析：</b>${q.explain ? renderMathText(q.explain) : '（本题模型未给出解析）'}</div>`
-      + (q.ref ? `<div class="ref">对应知识点：${escHtml(q.ref)}</div>` : '') + '</div>';
-  }).join('');
-
-  const prog = rec.progress || {};
-  const progressBlock = isAnswer ? '' : `
-    <div class="prog">
-      <div class="pt">学习进度推测：${escHtml(prog.level || '')}</div>
-      ${prog.summary ? `<div>${escHtml(prog.summary)}</div>` : ''}
-      ${Array.isArray(prog.weak) && prog.weak.length ? `<div>建议重点：${prog.weak.map(escHtml).join('、')}</div>` : ''}
-      ${prog.suggest ? `<div>复习建议：${escHtml(prog.suggest)}</div>` : ''}
-    </div>`;
-
-  return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>${escHtml(title)}</title>
-<style>
-@page { size: A4; margin: 16mm 15mm; }
-body { font-family: "Microsoft YaHei", sans-serif; font-size: 10.5pt; line-height: 1.75; color: #1f2421; }
-h1 { font-size: 17pt; color: #2f5d4b; margin: 0 0 2mm; }
-.meta { color: #6e7670; font-size: 9pt; margin-bottom: 6mm; }
-.prog { border: 1px solid #cec7b6; border-radius: 3mm; padding: 3mm 4mm; margin-bottom: 6mm; background: #faf9f5; font-size: 9.5pt; }
-.prog .pt { font-weight: 700; color: #2f5d4b; margin-bottom: 1.5mm; }
-.q { margin-bottom: 6mm; page-break-inside: avoid; }
-.qh { display: flex; align-items: center; gap: 2mm; margin-bottom: 1.5mm; }
-.no { display: inline-block; min-width: 7mm; height: 7mm; line-height: 7mm; text-align: center; border-radius: 50%;
-      background: #e6efe9; color: #2f5d4b; font-weight: 700; font-size: 9.5pt; }
-.type { font-size: 9pt; color: #6e7670; }
-.body { font-size: 10.5pt; }
-.blank { height: 28mm; border-bottom: 1px dashed #d6ccb6; margin-top: 2mm; }
-.ans, .exp { margin-top: 1.5mm; }
-.ref { color: #6e7670; font-size: 9pt; margin-top: 1mm; }
-.mathfail { font-family: 'Cascadia Mono', Consolas, monospace; font-size: 9.5pt; background: #f4f1ea; padding: 0 2px; border-radius: 2px; }
-.page-break { page-break-before: always; }
-.printhint { margin-top: 10mm; color: #6e7670; font-size: 9pt; }
-.printbtn { position: fixed; right: 12mm; bottom: 12mm; padding: 3mm 5mm; border: 0; border-radius: 3mm;
-            background: #2f5d4b; color: #fff; font-size: 10pt; cursor: pointer; }
-@media print { .printhint, .printbtn { display: none; } }
-</style></head><body>
-<h1>${escHtml(title)}</h1>
-<div class="meta">${escHtml(rec.subject.name)} · 共 ${rec.questions.length} 题 · 生成于 ${new Date().toLocaleString('zh-CN')}</div>
-${progressBlock}
-${rows}
-<div class="printhint">要变成 PDF：点下面的按钮，或在浏览器菜单里选「打印 → 目标：另存为 PDF」</div>
-<button class="printbtn" onclick="window.print()">打印 / 存为 PDF</button>
-<script>${katexInline().js}<\/script>
-<script>${katexInline().auto}<\/script>
-</body></html>`;
-}
-
-/** 正文里的 $…$ 先做分式化，再交给前端 KaTeX 自动渲染 */
-function renderMathText(s) {
-  return escHtml(fracifyMath(wrapBareMath(String(s || '')))).replace(/\n/g, '<br>');
-}
-
-/** 找本机可用的 Edge / Chrome，用它把 HTML 打成 PDF */
-function browserForPdf() {
-  const cands = [
-    'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
-    'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
-    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
-    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
-  ];
-  for (const p of cands) {
-    try { if (fs.existsSync(p)) return p; } catch {}
-  }
-  return null;
-}
-
-function htmlToPdf(html) {
-  return new Promise((resolve) => {
-    const exe = browserForPdf();
-    if (!exe) return resolve(null);
-    const dir = os.tmpdir();
-    const tag = 'mynotes-' + crypto.randomBytes(6).toString('hex');
-    const htmlPath = path.join(dir, tag + '.html');
-    const pdfPath = path.join(dir, tag + '.pdf');
-    try {
-      fs.writeFileSync(htmlPath, html, 'utf8');
-    } catch (e) {
-      return resolve(null);
-    }
-    const args = ['--headless=new', '--disable-gpu', '--no-pdf-header-footer',
-      '--print-to-pdf=' + pdfPath, 'file:///' + htmlPath.replace(/\\/g, '/')];
-    const child = spawn(exe, args, { stdio: 'ignore' });
-    const timer = setTimeout(() => { try { child.kill(); } catch {} }, 60000);
-    child.on('exit', () => {
-      clearTimeout(timer);
-      let buf = null;
-      try { buf = fs.readFileSync(pdfPath); } catch {}
-      try { fs.unlinkSync(htmlPath); } catch {}
-      try { fs.unlinkSync(pdfPath); } catch {}
-      resolve(buf && buf.length > 1000 ? buf : null);
-    });
-    child.on('error', () => { clearTimeout(timer); resolve(null); });
-  });
-}
-
-async function handlePracticePdf(req, res, url) {
-  const rec = PRACTICE.get(url.searchParams.get('token') || '');
-  if (!rec) return fail(res, 404, '练习题已过期，请重新生成');
-  const kind = url.searchParams.get('kind') === 'answers' ? 'answers' : 'questions';
-  const html = practiceHtml(rec, kind);
-  const base = rec.subject.name + '-' + (kind === 'answers' ? '答案' : '练习题');
-  const wantHtml = url.searchParams.get('format') === 'html';
-
-  const serveHtml = () => {
-    res.writeHead(200, {
-      'Content-Type': 'text/html; charset=utf-8',
-      'Content-Length': Buffer.byteLength(html),
-      'Content-Disposition': "attachment; filename*=UTF-8''" + encodeURIComponent(base + '.html'),
-      'Cache-Control': 'no-store',
-    });
-    res.end(html);
-  };
-
-  if (wantHtml) return serveHtml();
-
-  const pdf = await htmlToPdf(html);
-  if (!pdf) {
-    // 本机没有可用的浏览器（手机端就是这样）：给 HTML 附件，下载后可打印成 PDF
-    return serveHtml();
-  }
-  res.writeHead(200, {
-    'Content-Type': 'application/pdf',
-    'Content-Length': pdf.length,
-    'Content-Disposition': "attachment; filename*=UTF-8''" + encodeURIComponent(base + '.pdf'),
-    'Cache-Control': 'no-store',
-  });
-  res.end(pdf);
+  send(res, 200, { progress: out.progress, questions: out.questions });
 }
 
 async function handleExportNotesDoc(req, res) {
@@ -3011,7 +2861,6 @@ async function route(req, res) {
   if (m === 'GET' && p === '/api/export-notes') return handleExportNotes(req, res, url);
   if (m === 'POST' && p === '/api/export-map') return handleExportMapPost(req, res);
   if (m === 'POST' && p === '/api/practice') return handlePractice(req, res);
-  if (m === 'GET' && p === '/api/practice/pdf') return handlePracticePdf(req, res, url);
   if (m === 'POST' && p === '/api/export-notes-doc') return handleExportNotesDoc(req, res);
   if (m === 'GET' && p === '/api/export-notes-doc') return handleExportNotesDocGet(req, res, url);
   if (m === 'GET' && p === '/api/export-map') return handleExportMapGet(req, res, url);

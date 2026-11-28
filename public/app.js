@@ -303,7 +303,9 @@ function renderMath(text) {
       expr = token.slice(1, -1);
     }
     if (!looksLikeMath(expr, display)) {
-      out += esc(token);
+      // 判定不是公式：含中文的一律去掉 $ 定界符（多半是误配对的句子），
+      // 纯数字/英文保留原样（可能是金额 $5 这种写法）
+      out += /[\u4e00-\u9fa5]/.test(expr) ? esc(expr) : esc(token);
       last = m.index + token.length;
       continue;
     }
@@ -1193,7 +1195,7 @@ function moreSheet() {
 }
 
 
-/* ---------------- 练习题：推测进度 → 出题 → 下载题目/答案 PDF ---------------- */
+/* ---------------- 练习题：推测进度 → 出题（结果在弹窗内看答案） ---------------- */
 
 
 /* ---------------- 首次启动引导 ---------------- */
@@ -1318,13 +1320,7 @@ function practiceModal() {
           )
           .join('')}
       </div>
-      <div class="practice-download">
-        <a class="btn primary" href="/api/practice/pdf?token=${encodeURIComponent(data.token)}&kind=questions&format=html">下载题目 HTML</a>
-        <a class="btn primary" href="/api/practice/pdf?token=${encodeURIComponent(data.token)}&kind=answers&format=html">下载答案 HTML</a>
-        <a class="btn" href="/api/practice/pdf?token=${encodeURIComponent(data.token)}&kind=questions">题目 PDF（桌面端）</a>
-        <a class="btn" href="/api/practice/pdf?token=${encodeURIComponent(data.token)}&kind=answers">答案 PDF（桌面端）</a>
-        <span class="hint">${isTouchUi() ? '下载 HTML 后用浏览器打开，点页面右下「打印 / 存为 PDF」即可' : '电脑上直接下 PDF；也可以下 HTML 再打印'}</span>
-      </div>`
+`
     : '';
 
   return `
@@ -1332,7 +1328,7 @@ function practiceModal() {
       <div class="panel-head">
         <div>
           <h2>练习题</h2>
-          <div class="sub">按当前科目已有的笔记推测进度，再据此出题；生成后可以下载题目与答案两个 PDF</div>
+          <div class="sub">按当前科目已有的笔记推测进度，再据此出题；每题可展开看答案与解析</div>
         </div>
         <div class="actions"><button class="btn sm ghost" data-act="close-modal">${icon('close')}</button></div>
       </div>

@@ -1260,8 +1260,6 @@ html.allow-select body * {
 .pq-ans summary { cursor: pointer; color: var(--accent); }
 .pq-a, .pq-e { margin-top: 6px; line-height: 1.7; }
 .pq-ref { margin-top: 4px; color: var(--muted); font-size: 12px; }
-.practice-download { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--line); }
-.practice-download .hint { flex-basis: 100%; font-size: 12px; color: var(--muted); }
 
 /* ---------------- 首次引导 ---------------- */
 .onboard-panel { max-width: 560px; }
@@ -1296,7 +1294,6 @@ html.allow-select body * {
 .practice-panel select.input,
 .practice-panel textarea.input { width: 100%; }
 .practice-panel .ask-actions { gap: 10px; }
-.practice-download .btn { flex: 1 1 46%; justify-content: center; }
 
 @media (max-width: 760px) {
   .practice-panel .panel-body,
@@ -1308,8 +1305,6 @@ html.allow-select body * {
   .practice-panel textarea.input { font-size: 15px; line-height: 1.6; }
   .practice-panel .ask-actions { flex-direction: column-reverse; }
   .practice-panel .ask-actions .btn { width: 100%; height: 44px; }
-  .practice-download { flex-direction: column; }
-  .practice-download .btn { width: 100%; flex: none; height: 44px; }
   .practice-panel .panel-head { position: relative; padding-right: 54px; }
   .practice-panel .panel-head .actions,
   .onboard-panel .panel-head .actions { position: absolute; right: 12px; top: 12px; width: auto; }
