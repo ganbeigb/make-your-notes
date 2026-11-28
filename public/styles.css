@@ -1272,3 +1272,12 @@ html.allow-select body * {
 .onb-dot.on { background: var(--accent); width: 18px; border-radius: 4px; }
 .onb-actions { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
 .onb-actions .spacer { flex: 1; }
+
+/* 触摸设备：整体字号略放大，避免手机上看不清 */
+@media (pointer: coarse) {
+  body { font-size: 15px; }
+  .kcard .body, .note-body, .item-body { font-size: 14.5px; }
+  .btn { font-size: 14px; }
+  .sheet-actions button { font-size: 15px; padding: 13px 14px; }
+  .panel-head h2 { font-size: 17px; }
+}
