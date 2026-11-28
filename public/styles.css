@@ -1281,3 +1281,38 @@ html.allow-select body * {
   .sheet-actions button { font-size: 15px; padding: 13px 14px; }
   .panel-head h2 { font-size: 17px; }
 }
+
+/* 练习题 / 引导：补内边距（之前没写，手机上内容贴边） */
+.practice-panel .panel-body,
+.onboard-panel .panel-body {
+  padding: 18px 22px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.practice-panel .field label,
+.onboard-panel .field label { font-size: 13px; }
+.practice-panel .input,
+.practice-panel select.input,
+.practice-panel textarea.input { width: 100%; }
+.practice-panel .ask-actions { gap: 10px; }
+.practice-download .btn { flex: 1 1 46%; justify-content: center; }
+
+@media (max-width: 760px) {
+  .practice-panel .panel-body,
+  .onboard-panel .panel-body { padding: 14px 16px 20px; gap: 10px; }
+  .practice-panel .row2,
+  .onboard-panel .row2 { grid-template-columns: 1fr; gap: 10px; }
+  .practice-panel .input,
+  .practice-panel select.input { height: 44px; font-size: 15px; }
+  .practice-panel textarea.input { font-size: 15px; line-height: 1.6; }
+  .practice-panel .ask-actions { flex-direction: column-reverse; }
+  .practice-panel .ask-actions .btn { width: 100%; height: 44px; }
+  .practice-download { flex-direction: column; }
+  .practice-download .btn { width: 100%; flex: none; height: 44px; }
+  .practice-panel .panel-head { position: relative; padding-right: 54px; }
+  .practice-panel .panel-head .actions,
+  .onboard-panel .panel-head .actions { position: absolute; right: 12px; top: 12px; width: auto; }
+  .onb-actions { flex-wrap: wrap; }
+}
+

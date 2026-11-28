@@ -1152,7 +1152,7 @@ const PRACTICE_SYSTEM = `你是这门课的经验助教。用户会给你一个�
    - weak：最多 3 条，最需要补的分类或知识点（用笔记里的真实名称）
    - suggest：一句话给下一步该怎么复习
 2. 生成练习题 questions：按用户要求的题量出题，优先覆盖 weak 与重要度高的知识点；题型在「选择 / 填空 / 计算 / 简答」中按内容选择。
-   - question：题干完整可独立作答（需要数据时自己给具体数值）
+   - question：题干完整可独立作答（需要数据时自己给具体数值），尽量控制在 80 字内
    - answer：标准答案（简洁、可直接对照）
    - explain：解析，说明步骤与易错点
    - ref：对应笔记里哪个知识点（照抄笔记里的名称）
@@ -1162,6 +1162,45 @@ const PRACTICE_SYSTEM = `你是这门课的经验助教。用户会给你一个�
 - 数学表达式用 LaTeX，行内 $...$，独立公式 $$...$$。
 - 不重复出同一考点的题；难度从易到难排列。
 - 中文输出；只输出 JSON，不要 Markdown 代码块。`;
+
+
+/** 从可能被截断的模型输出里尽量抢救出完整的题目对象 */
+function salvageQuestions(text) {
+  const s = String(text || '');
+  if (!s) return [];
+  const key = s.indexOf('"questions"');
+  let from = key >= 0 ? s.indexOf('[', key) : s.indexOf('{');
+  if (from < 0) return [];
+  const out = [];
+  let depth = 0;
+  let objStart = -1;
+  let inStr = false;
+  let esc = false;
+  for (let i = from; i < s.length; i++) {
+    const ch = s[i];
+    if (inStr) {
+      if (esc) esc = false;
+      else if (ch === '\\') esc = true;
+      else if (ch === '"') inStr = false;
+      continue;
+    }
+    if (ch === '"') { inStr = true; continue; }
+    if (ch === '{') {
+      if (depth === 0) objStart = i;
+      depth++;
+    } else if (ch === '}') {
+      if (depth > 0) depth--;
+      if (depth === 0 && objStart >= 0) {
+        try {
+          const o = JSON.parse(s.slice(objStart, i + 1));
+          if (o && typeof o === 'object') out.push(o);
+        } catch {}
+        objStart = -1;
+      }
+    }
+  }
+  return out;
+}
 
 /** 根据科目笔记推测进度并出练习题 */
 async function practiceSet({ settings, apiKey, subject, digest, extra, count }) {
@@ -1206,14 +1245,15 @@ async function practiceSet({ settings, apiKey, subject, digest, extra, count }) 
       { role: 'user', content: user },
     ],
     response_format: { type: 'json_object' },
-    max_tokens: Math.min(8000, 1200 + n * 220),
+    max_tokens: Math.min(8192, 2400 + n * 420),
     temperature: 0.5,
     stream: false,
   };
   applyReasoning(payload, settings);
 
   const data = await chatJson(settings, apiKey, payload);
-  const parsed = parseJsonLoose(data?.choices?.[0]?.message?.content || '') || {};
+  const content = data?.choices?.[0]?.message?.content || '';
+  const parsed = parseJsonLoose(content) || {};
   const pr = parsed.progress && typeof parsed.progress === 'object' ? parsed.progress : {};
   const progress = {
     level: str(pr.level, 40) || '未知',
@@ -1221,8 +1261,9 @@ async function practiceSet({ settings, apiKey, subject, digest, extra, count }) 
     weak: Array.isArray(pr.weak) ? pr.weak.map((x) => str(x, 60)).filter(Boolean).slice(0, 3) : [],
     suggest: str(pr.suggest, 200),
   };
-  const raw = Array.isArray(parsed.questions) ? parsed.questions : [];
-  const questions = raw
+  let raw = Array.isArray(parsed.questions) ? parsed.questions : [];
+  if (!raw.length) raw = salvageQuestions(content).filter((q) => q && q.question);
+  let questions = raw
     .map((q) => ({
       type: str(q.type, 8) || '简答',
       question: str(q.question, 1500),
@@ -1232,7 +1273,43 @@ async function practiceSet({ settings, apiKey, subject, digest, extra, count }) 
     }))
     .filter((q) => q.question)
     .slice(0, n);
-  if (!questions.length) throw new Error('模型没有返回题目，请重试');
+  if (!questions.length) {
+    // 缩量重试：只要题目，数量减半，避免再次被输出长度截断
+    const n2 = Math.max(3, Math.min(8, Math.ceil(n / 2)));
+    const retryPayload = {
+      model: textModelOf(settings),
+      messages: [
+        { role: 'system', content: '你只输出 JSON：{"questions":[{"type":"","question":"","answer":"","explain":"","ref":""}]}，不要任何解释文字、不要 Markdown。' },
+        { role: 'user', content: user + '\n\n这次只要 ' + n2 + ' 道题，答案是简明的一句话，解析不超过 30 字。' },
+      ],
+      response_format: { type: 'json_object' },
+      max_tokens: 4096,
+      temperature: 0.3,
+      stream: false,
+    };
+    applyReasoning(retryPayload, settings);
+    try {
+      const data2 = await chatJson(settings, apiKey, retryPayload);
+      const c2 = data2?.choices?.[0]?.message?.content || '';
+      const p2 = parseJsonLoose(c2) || {};
+      let raw2 = Array.isArray(p2.questions) ? p2.questions : [];
+      if (!raw2.length) raw2 = salvageQuestions(c2).filter((q) => q && q.question);
+      questions = raw2
+        .map((q) => ({
+          type: str(q.type, 8) || '简答',
+          question: str(q.question, 1500),
+          answer: str(q.answer, 1500),
+          explain: str(q.explain, 1000),
+          ref: str(q.ref, 80),
+        }))
+        .filter((q) => q.question)
+        .slice(0, n);
+    } catch {}
+  }
+  if (!questions.length) {
+    const hint = String(content || '').replace(/\s+/g, ' ').slice(0, 120);
+    throw new Error(hint ? '模型没有返回题目（原始输出前 120 字：' + hint + '）' : '模型没有返回内容，请重试');
+  }
   return { progress, questions, usage: normalizeUsage(data.usage, settings, textModelOf(settings)) };
 }
 
