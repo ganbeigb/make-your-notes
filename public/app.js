@@ -1214,9 +1214,11 @@ function practiceModal() {
           .join('')}
       </div>
       <div class="practice-download">
-        <a class="btn primary" href="/api/practice/pdf?token=${encodeURIComponent(data.token)}&kind=questions" target="_blank">下载题目 PDF</a>
-        <a class="btn" href="/api/practice/pdf?token=${encodeURIComponent(data.token)}&kind=answers" target="_blank">下载答案 PDF</a>
-        <span class="hint">电脑端直接下载 PDF；手机端会在浏览器里打开可打印页面，用「发送到打印 → 存为 PDF」即可</span>
+        <a class="btn primary" href="/api/practice/pdf?token=${encodeURIComponent(data.token)}&kind=questions&format=html">下载题目 HTML</a>
+        <a class="btn primary" href="/api/practice/pdf?token=${encodeURIComponent(data.token)}&kind=answers&format=html">下载答案 HTML</a>
+        <a class="btn" href="/api/practice/pdf?token=${encodeURIComponent(data.token)}&kind=questions">题目 PDF（桌面端）</a>
+        <a class="btn" href="/api/practice/pdf?token=${encodeURIComponent(data.token)}&kind=answers">答案 PDF（桌面端）</a>
+        <span class="hint">手机：下载 HTML 后用浏览器打开，点页面右下「打印 / 存为 PDF」即可；电脑：直接下 PDF</span>
       </div>`
     : '';
 

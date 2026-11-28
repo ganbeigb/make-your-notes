@@ -1951,11 +1951,17 @@ h1 { font-size: 17pt; color: #2f5d4b; margin: 0 0 2mm; }
 .ans, .exp { margin-top: 1.5mm; }
 .ref { color: #6e7670; font-size: 9pt; margin-top: 1mm; }
 .page-break { page-break-before: always; }
+.printhint { margin-top: 10mm; color: #6e7670; font-size: 9pt; }
+.printbtn { position: fixed; right: 12mm; bottom: 12mm; padding: 3mm 5mm; border: 0; border-radius: 3mm;
+            background: #2f5d4b; color: #fff; font-size: 10pt; cursor: pointer; }
+@media print { .printhint, .printbtn { display: none; } }
 </style></head><body>
 <h1>${escHtml(title)}</h1>
 <div class="meta">${escHtml(rec.subject.name)} · 共 ${rec.questions.length} 题 · 生成于 ${new Date().toLocaleString('zh-CN')}</div>
 ${progressBlock}
 ${rows}
+<div class="printhint">要变成 PDF：点下面的按钮，或在浏览器菜单里选「打印 → 目标：另存为 PDF」</div>
+<button class="printbtn" onclick="window.print()">打印 / 存为 PDF</button>
 <script>${katexInline().js}<\/script>
 <script>${katexInline().auto}<\/script>
 </body></html>`;
@@ -2014,15 +2020,25 @@ async function handlePracticePdf(req, res, url) {
   if (!rec) return fail(res, 404, '练习题已过期，请重新生成');
   const kind = url.searchParams.get('kind') === 'answers' ? 'answers' : 'questions';
   const html = practiceHtml(rec, kind);
-  const pdf = await htmlToPdf(html);
   const base = rec.subject.name + '-' + (kind === 'answers' ? '答案' : '练习题');
-  if (!pdf) {
-    // 没有可用的浏览器：直接返回 HTML，让用户在浏览器里「打印 / 存为 PDF」
+  const wantHtml = url.searchParams.get('format') === 'html';
+
+  const serveHtml = () => {
     res.writeHead(200, {
       'Content-Type': 'text/html; charset=utf-8',
-      'Content-Disposition': "inline; filename*=UTF-8''" + encodeURIComponent(base + '.html'),
+      'Content-Length': Buffer.byteLength(html),
+      'Content-Disposition': "attachment; filename*=UTF-8''" + encodeURIComponent(base + '.html'),
+      'Cache-Control': 'no-store',
     });
-    return res.end(html);
+    res.end(html);
+  };
+
+  if (wantHtml) return serveHtml();
+
+  const pdf = await htmlToPdf(html);
+  if (!pdf) {
+    // 本机没有可用的浏览器（手机端就是这样）：给 HTML 附件，下载后可打印成 PDF
+    return serveHtml();
   }
   res.writeHead(200, {
     'Content-Type': 'application/pdf',
