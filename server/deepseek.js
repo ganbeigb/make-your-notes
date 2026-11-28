@@ -1151,10 +1151,11 @@ const PRACTICE_SYSTEM = `你是这门课的经验助教。用户会给你一个�
    - summary：一句话说明依据，要**点名具体分类与其中的标题**（例如「极限类 12 条已覆盖到夹逼准则，微分方程只有 3 条」）
    - weak：最多 3 条，最需要补的分类或知识点标题（照抄清单里的真实标题）
    - suggest：一句话给下一步该怎么复习
-2. 生成练习题 questions：按用户要求的题量出题，优先覆盖 weak 与重要度高的知识点；题型在「选择 / 填空 / 计算 / 简答」中按内容选择。
+2. 生成练习题 questions：按用户要求的题量出题，优先覆盖 weak 与重要度高的知识点。
+   **默认不出叙述题**：题型只用「判断 / 选择 / 填空 / 计算 / 证明」这类有明确答案的；不要出「简答 / 叙述 / 说明 / 论述 / 谈谈你的理解」这类开放题——除非用户额外要求里明确要。
    - question：题干完整可独立作答（需要数据时自己给具体数值），尽量控制在 80 字内
    - answer：标准答案（简洁、可直接对照）
-   - explain：**必填**，至少一句，说明关键步骤或易错点；没有解析的题目视为不合格
+   - explain：**必填**，至少一句，说明关键步骤或易错点；选择题要指出正确选项，没有解析的题目视为不合格
    - ref：对应笔记里哪个知识点（照抄笔记里的名称）
 
 要求：
@@ -1202,6 +1203,40 @@ function salvageQuestions(text) {
   return out;
 }
 
+
+/** 默认不要的题型（用户明确要求时保留） */
+function isNarrativeType(type) {
+  return /简答|叙述|论述|说明|谈谈|阐述|评价|论述题/.test(String(type || ''));
+}
+
+/** 去掉答案/解析里重复的题干（模型常把题干抄一遍再作答） */
+function stripEcho(text, question) {
+  let t = String(text || '').trim();
+  const q = String(question || '').trim();
+  if (!t) return t;
+  // 先去掉「题目：」「题干：」「答案：」这类前缀，再比对题干
+  t = t.replace(/^(题目|题干|问)[：:]\s*/, '').trim();
+  if (q && t.startsWith(q)) t = t.slice(q.length).replace(/^[：:，,。.\s]+/, '').trim();
+  const head = q.slice(0, Math.min(18, q.length));
+  if (head && t.startsWith(head) && t.length > head.length + 4) {
+    t = t.slice(head.length).replace(/^[：:，,。.…\s]+/, '').trim();
+  }
+  return t;
+}
+
+/** 同一题只留一条；题干归一化后比较 */
+function dedupeQuestions(list) {
+  const seen = new Set();
+  const out = [];
+  for (const q of list) {
+    const key = String(q.question || '').replace(/\s+/g, '').slice(0, 60);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    out.push(q);
+  }
+  return out;
+}
+
 /** 根据科目笔记推测进度并出练习题 */
 async function practiceSet({ settings, apiKey, subject, digest, extra, count }) {
   const n = Math.max(1, Math.min(50, Number(count) || 15));
@@ -1214,7 +1249,7 @@ async function practiceSet({ settings, apiKey, subject, digest, extra, count }) 
         suggest: '先补齐覆盖较少的分类，再做题巩固。',
       },
       questions: Array.from({ length: Math.min(n, 3) }, (_, i) => ({
-        type: '简答',
+        type: '填空',
         question: `（演示题目 ${i + 1}）请解释你笔记中“${digest.sampleNames[i] || '某个知识点'}”的含义。`,
         answer: '演示答案：接入 API 后这里是对应标准答案。',
         explain: '演示解析。',
@@ -1341,7 +1376,16 @@ async function practiceSet({ settings, apiKey, subject, digest, extra, count }) 
     const hint = String(content || '').replace(/\s+/g, ' ').slice(0, 120);
     throw new Error(hint ? '模型没有返回题目（原始输出前 120 字：' + hint + '）' : '模型没有返回内容，请重试');
   }
-  return { progress, questions, usage: normalizeUsage(data.usage, settings, textModelOf(settings)) };
+  // 清洗：按需排除叙述题 → 去重 → 去掉答案里重复的题干
+  const allowNarrative = /简答|叙述|论述|说明|谈谈|阐述|开放题/.test(extra || '');
+  let cleaned = allowNarrative ? questions : questions.filter((q) => !isNarrativeType(q.type));
+  cleaned = dedupeQuestions(cleaned).map((q) => ({
+    ...q,
+    answer: stripEcho(q.answer, q.question),
+    explain: stripEcho(q.explain, q.question),
+  }));
+
+  return { progress, questions: cleaned, usage: normalizeUsage(data.usage, settings, textModelOf(settings)) };
 }
 
 module.exports = {

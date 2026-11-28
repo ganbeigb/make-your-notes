@@ -1774,7 +1774,8 @@ function katexInline() {
       '  var t=String(s).trim();',
       '  if(!t)return false;',
       '  if(t.length>300)return false;',
-      '  if(/[\u4e00-\u9fa5]/.test(t))return false;',
+      '  var mk=/[\\^_{}=+\\-*<>]/.test(t);',
+      '  if(/[\u4e00-\u9fa5]/.test(t))return mk&&/[\\^_=]/.test(t);',
       '  if(/^\\d+([.,]\\d+)?$/.test(t))return false;',
       '  return /[\\^_{}=+\\-*/<>\u2264\u2265\u00b1\u00d7\u00b7\u00f7\u222b\u2211\u221a\u03c0\u03b8\u03b1\u03b2\u03b3\u03bb\u03bc\u03c3\u0394]/.test(t)'
       + " || /^[A-Za-z][A-Za-z0-9 ]{0,12}$/.test(t);",
@@ -1800,8 +1801,12 @@ function katexInline() {
       '      if(!frag)frag=document.createDocumentFragment();',
       '      if(m.index>last)frag.appendChild(document.createTextNode(text.slice(last,m.index)));',
       '      var span=document.createElement("span");',
-      '      try{span.innerHTML=katex.renderToString(expr,{displayMode:display,throwOnError:false,strict:false});}',
-      '      catch(e){span.textContent=m[0];}',
+      '      try{',
+      '        var out=katex.renderToString(expr,{displayMode:display,throwOnError:false,strict:false});',
+      '        if(out.indexOf("katex-error")>=0){span.className="mathfail";span.textContent=m[0];}',
+      '        else span.innerHTML=out;',
+      '      }',
+      '      catch(e){span.className="mathfail";span.textContent=m[0];}',
       '      frag.appendChild(span);last=m.index+m[0].length;',
       '    }',
       '    if(frag){if(last<text.length)frag.appendChild(document.createTextNode(text.slice(last)));node.parentNode.replaceChild(frag,node);}',
@@ -1952,6 +1957,7 @@ h1 { font-size: 17pt; color: #2f5d4b; margin: 0 0 2mm; }
 .blank { height: 28mm; border-bottom: 1px dashed #d6ccb6; margin-top: 2mm; }
 .ans, .exp { margin-top: 1.5mm; }
 .ref { color: #6e7670; font-size: 9pt; margin-top: 1mm; }
+.mathfail { font-family: 'Cascadia Mono', Consolas, monospace; font-size: 9.5pt; background: #f4f1ea; padding: 0 2px; border-radius: 2px; }
 .page-break { page-break-before: always; }
 .printhint { margin-top: 10mm; color: #6e7670; font-size: 9pt; }
 .printbtn { position: fixed; right: 12mm; bottom: 12mm; padding: 3mm 5mm; border: 0; border-radius: 3mm;

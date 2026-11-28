@@ -266,9 +266,11 @@ function looksLikeMath(expr, display) {
   if (!t) return false;
   if (display) return true;
   if (t.length > 300) return false;
-  if (/[\u4e00-\u9fa5]/.test(t)) return false;
   if (/^\d+([.,]\d+)?$/.test(t)) return false;
-  return /[\\^_{}=+\-*/<>≤≥±×·÷∫∑√πθαβγλμσΔ]/.test(t) || /^[A-Za-z][A-Za-z0-9 ]{0,12}$/.test(t);
+  const mathMark = /[\\^_{}=+\-*/<>≤≥±×·÷∫∑√πθαβγλμσΔ]/.test(t);
+  // 含中文时，只有确实带数学符号（如 $\text{面积}=S$）才当公式，避免吞掉普通文字
+  if (/[\u4e00-\u9fa5]/.test(t)) return mathMark && /\\|\^|_|=/.test(t);
+  return mathMark || /^[A-Za-z][A-Za-z0-9 ]{0,12}$/.test(t);
 }
 
 function renderMath(text) {
@@ -306,13 +308,16 @@ function renderMath(text) {
       continue;
     }
     try {
-      out += window.katex.renderToString(slashToFrac(expr), {
+      const rendered = window.katex.renderToString(slashToFrac(expr), {
         displayMode: display,
         throwOnError: false,
         strict: false,
       });
+      // KaTeX 渲染失败时会塞一个红色的 katex-error；这时宁可显示原始写法，也别显示报错
+      if (/katex-error/.test(rendered)) out += `<code class="mathfail">${esc(token)}</code>`;
+      else out += rendered;
     } catch {
-      out += esc(token);
+      out += `<code class="mathfail">${esc(token)}</code>`;
     }
     last = m.index + token.length;
   }
