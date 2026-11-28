@@ -669,7 +669,7 @@ function emptyDeckView() {
     <div class="empty" data-act="upload">
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.4"/><path d="M21 15l-5-5L5 21"/></svg>
       <b>这个科目还没有课件</b>
-      <p>把上课拍的 PPT 图片加进来：拖拽、或点下面按钮从相册选、也可以直接拍照。</p>
+      <p>把上课拍的 PPT 图片加进来：${isTouchUi() ? '点下面按钮从相册选，或直接拍照' : '拖拽进来、或点下面按钮从相册选，也可以直接拍照'}。</p>
       <button class="btn primary" data-act="upload">${icon('upload')} 选择图片</button>
     </div>`;
 }
@@ -903,16 +903,30 @@ function categoriesView() {
 /* 渲染：主入口                                                        */
 /* ------------------------------------------------------------------ */
 
+
+/**
+ * 是否是触摸/手机环境：APK 内置、移动 UA、粗指针设备
+ * 用来决定是否展示「Ctrl+V」「拖拽」这类电脑专属操作提示
+ */
+function isTouchUi() {
+  try {
+    if (S?.share?.embedded) return true;
+    if (typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches) return true;
+    if (/Android|iPhone|iPad|iPod|Mobile|HarmonyOS/i.test(navigator.userAgent || '')) return true;
+  } catch {}
+  return false;
+}
+
 function welcomeView() {
   return `
     <div class="welcome">
       <div class="welcome-card">
         <div class="kicker">Local · DeepSeek Vision</div>
         <h1>把课件照片，变成<br>可以反复复习的知识库</h1>
-        <p class="lead">按科目上传上课拍的 PPT，模型自动提取知识点、补充拓展，并整理成目录。图片和笔记全部保存在你自己的电脑里，只把图片发给 DeepSeek。</p>
+        <p class="lead">按科目上传上课拍的 PPT，模型自动提取知识点、补充拓展，并整理成目录。${isTouchUi() ? '图片和笔记全部保存在这台手机里，只把图片发给 DeepSeek。' : '图片和笔记全部保存在你自己的电脑里，只把图片发给 DeepSeek。'}</p>
         <div class="steps">
           <div class="step"><b>01 建科目</b><span>高数、操作系统、经济学…按科目分开管理</span></div>
-          <div class="step"><b>02 传图片</b><span>拖拽或粘贴截图，一次可以传几十张</span></div>
+          <div class="step"><b>02 传图片</b><span>${isTouchUi() ? '从相册选图或直接拍照，一次可以传几十张' : '拖拽或粘贴截图，一次可以传几十张'}</span></div>
           <div class="step"><b>03 自动整理</b><span>逐页提取知识点，再自动归类成目录</span></div>
         </div>
         <div class="foot">
@@ -1194,8 +1208,9 @@ const ONBOARD_STEPS = [
   },
   {
     title: '② 上传课件照片',
-    body: `点「上传课件」选图，也可以直接把图片拖进窗口，或截图后按 Ctrl+V 粘贴。
-识别在后台跑，关掉页面也会继续。`,
+    body: isTouchUi()
+      ? `点「上传课件」，从相册里选课件照片，或者直接拍。\n识别在后台跑，切到别的应用也会继续。`
+      : `点「上传课件」选图，也可以直接把图片拖进窗口，或截图后按 Ctrl+V 粘贴。\n识别在后台跑，关掉页面也会继续。`,
     tip: '一学期的 PPT 拍照可以一次性全传。',
   },
   {
@@ -1303,7 +1318,7 @@ function practiceModal() {
         <a class="btn primary" href="/api/practice/pdf?token=${encodeURIComponent(data.token)}&kind=answers&format=html">下载答案 HTML</a>
         <a class="btn" href="/api/practice/pdf?token=${encodeURIComponent(data.token)}&kind=questions">题目 PDF（桌面端）</a>
         <a class="btn" href="/api/practice/pdf?token=${encodeURIComponent(data.token)}&kind=answers">答案 PDF（桌面端）</a>
-        <span class="hint">手机：下载 HTML 后用浏览器打开，点页面右下「打印 / 存为 PDF」即可；电脑：直接下 PDF</span>
+        <span class="hint">${isTouchUi() ? '下载 HTML 后用浏览器打开，点页面右下「打印 / 存为 PDF」即可' : '电脑上直接下 PDF；也可以下 HTML 再打印'}</span>
       </div>`
     : '';
 
