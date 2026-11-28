@@ -196,6 +196,8 @@ function unwrapParens(s) {
 function slashToFrac(expr) {
   const s = String(expr == null ? '' : expr);
   if (!s.includes('/')) return s;
+  // 矩阵/对齐环境里的 / 不能乱切（& 和 \\ 是列分隔，\begin 里还有嵌套组）
+  if (s.includes('&') || s.includes('\\\\') || /\\begin\{|\\end\{/.test(s)) return s;
   const parts = splitTop(s);
   if (parts.length === 1) {
     return s.replace(/\{([^{}]*)\}/g, (m, inner) => '{' + slashToFrac(inner) + '}');
@@ -267,10 +269,11 @@ function looksLikeMath(expr, display) {
   if (display) return true;
   if (t.length > 300) return false;
   if (/^\d+([.,]\d+)?$/.test(t)) return false;
-  const mathMark = /[\\^_{}=+\-*/<>≤≥±×·÷∫∑√πθαβγλμσΔ]/.test(t);
-  // 含中文时，只有确实带数学符号（如 $\text{面积}=S$）才当公式，避免吞掉普通文字
+  const mathMark = /[\\^_{}=+\-*/<>()\[\]|,≤≥±×·÷∫∑√πθαβγλμσΔ]/.test(t);
+  // 含中文时，只有确实带数学符号（如 $\text{面积}=S$）才当公式，避免吞掉普通文字；
+  // 不含中文时放宽：$(A,b)$、$x$ 这种极简写法也渲染
   if (/[\u4e00-\u9fa5]/.test(t)) return mathMark && /\\|\^|_|=/.test(t);
-  return mathMark || /^[A-Za-z][A-Za-z0-9 ]{0,12}$/.test(t);
+  return true;
 }
 
 function renderMath(text) {

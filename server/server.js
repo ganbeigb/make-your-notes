@@ -527,10 +527,11 @@ function fracifyMath(text) {
   return s.replace(/\$\$([\s\S]+?)\$\$|\$([^$\n]{1,400})\$|\\\[([\s\S]+?)\\\]|\\\(([\s\S]+?)\\\)/g,
     (m, d, i, dd, ii) => {
       try {
-        if (d !== undefined) return '$$' + slashToFrac(d) + '$$';
-        if (i !== undefined) return '$' + slashToFrac(i) + '$';
-        if (dd !== undefined) return '\\[' + slashToFrac(dd) + '\\]';
-        return '\\(' + slashToFrac(ii) + '\\)';
+        const skip = (x) => x.includes('&') || x.includes('\\\\') || /\\begin\{|\\end\{/.test(x);
+        if (d !== undefined) return '$$' + (skip(d) ? d : slashToFrac(d)) + '$$';
+        if (i !== undefined) return '$' + (skip(i) ? i : slashToFrac(i)) + '$';
+        if (dd !== undefined) return '\\[' + (skip(dd) ? dd : slashToFrac(dd)) + '\\]';
+        return '\\(' + (skip(ii) ? ii : slashToFrac(ii)) + '\\)';
       } catch (e) {
         return m;
       }
@@ -1777,8 +1778,7 @@ function katexInline() {
       '  var mk=/[\\^_{}=+\\-*<>]/.test(t);',
       '  if(/[\u4e00-\u9fa5]/.test(t))return mk&&/[\\^_=]/.test(t);',
       '  if(/^\\d+([.,]\\d+)?$/.test(t))return false;',
-      '  return /[\\^_{}=+\\-*/<>\u2264\u2265\u00b1\u00d7\u00b7\u00f7\u222b\u2211\u221a\u03c0\u03b8\u03b1\u03b2\u03b3\u03bb\u03bc\u03c3\u0394]/.test(t)'
-      + " || /^[A-Za-z][A-Za-z0-9 ]{0,12}$/.test(t);",
+      '  return true;',
       '}',
       'function autoMath(root){',
       '  var rx=/\\$\\$([\\s\\S]+?)\\$\\$|\\\\\\[([\\s\\S]+?)\\\\\\]|\\\\\\(([\\s\\S]+?)\\\\\\)|\\$([^$\\n]{1,400})\\$/g;',
