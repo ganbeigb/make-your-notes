@@ -1143,18 +1143,18 @@ async function extensionTitles({ settings, apiKey, subject, items }) {
 }
 
 
-const PRACTICE_SYSTEM = `你是这门课的经验助教。用户会给你一个科目的全部笔记摘要（分类、知识点名称、重要度、页面覆盖情况）以及他希望的练习方式。
+const PRACTICE_SYSTEM = `你是这门课的经验助教。用户会给你一个科目的**知识点标题清单**（只有标题、所属分类、重要度，不含正文）以及他希望的练习方式。
 请完成两件事，并只输出一个 JSON 对象：
 
-1. 推测学习进度 progress：根据知识点覆盖了哪些分类、哪些分类还很空、页面覆盖比例来判断。
+1. 推测学习进度 progress：**只依据标题清单**判断——哪些分类有多少标题、哪些分类标题明显偏少、标题反映的知识范围是否成体系；不要假设正文内容。
    - level：从「刚起步 / 已过一半 / 接近完成 / 已系统掌握」里选一个
-   - summary：一句话说明依据（提到具体分类与条数）
-   - weak：最多 3 条，最需要补的分类或知识点（用笔记里的真实名称）
+   - summary：一句话说明依据，要**点名具体分类与其中的标题**（例如「极限类 12 条已覆盖到夹逼准则，微分方程只有 3 条」）
+   - weak：最多 3 条，最需要补的分类或知识点标题（照抄清单里的真实标题）
    - suggest：一句话给下一步该怎么复习
 2. 生成练习题 questions：按用户要求的题量出题，优先覆盖 weak 与重要度高的知识点；题型在「选择 / 填空 / 计算 / 简答」中按内容选择。
    - question：题干完整可独立作答（需要数据时自己给具体数值），尽量控制在 80 字内
    - answer：标准答案（简洁、可直接对照）
-   - explain：解析，说明步骤与易错点
+   - explain：**必填**，至少一句，说明关键步骤或易错点；没有解析的题目视为不合格
    - ref：对应笔记里哪个知识点（照抄笔记里的名称）
 
 要求：
@@ -1229,7 +1229,7 @@ async function practiceSet({ settings, apiKey, subject, digest, extra, count }) 
     subject.criteria ? `学生的分类标准：${subject.criteria}` : '',
     `笔记规模：${digest.itemCount} 条知识点，${digest.categoryCount} 个分类，课程共 ${digest.slideCount} 页，其中 ${digest.coveredSlides} 页已有笔记`,
     '',
-    '笔记清单（分类 / 知识点（重要度，是否拓展））：',
+    '知识点标题清单（只有标题、所属分类、重要度，不含正文）：',
     digest.text,
     '',
     `题量：${n} 题`,
@@ -1273,6 +1273,7 @@ async function practiceSet({ settings, apiKey, subject, digest, extra, count }) 
     }))
     .filter((q) => q.question)
     .slice(0, n);
+
   if (!questions.length) {
     // 缩量重试：只要题目，数量减半，避免再次被输出长度截断
     const n2 = Math.max(3, Math.min(8, Math.ceil(n / 2)));
@@ -1306,6 +1307,36 @@ async function practiceSet({ settings, apiKey, subject, digest, extra, count }) 
         .slice(0, n);
     } catch {}
   }
+  // 解析必填：缺解析的题，追加一次补全请求
+  const missing = questions.filter((q) => !q.explain || !q.explain.trim());
+  if (missing.length) {
+    try {
+      const ask = missing
+        .map((q, i) => `${i + 1}. 题目：${q.question}\n答案：${q.answer}`)
+        .join('\n\n');
+      const fixPayload = {
+        model: textModelOf(settings),
+        messages: [
+          { role: 'system', content: '你只输出 JSON：{"explanations":["第一题的解析","第二题的解析"]}，每条一到两句，说明关键步骤与易错点，不要编号、不要 Markdown。' },
+          { role: 'user', content: '下面每道题都要一句话解析：\n\n' + ask },
+        ],
+        response_format: { type: 'json_object' },
+        max_tokens: 2048,
+        temperature: 0.3,
+        stream: false,
+      };
+      applyReasoning(fixPayload, settings);
+      const fixData = await chatJson(settings, apiKey, fixPayload);
+      const fixTxt = fixData?.choices?.[0]?.message?.content || '';
+      const fixParsed = parseJsonLoose(fixTxt) || {};
+      const list = Array.isArray(fixParsed.explanations) ? fixParsed.explanations : [];
+      missing.forEach((q, i) => {
+        const t = str(list[i], 1000);
+        if (t) q.explain = t;
+      });
+    } catch {}
+  }
+
   if (!questions.length) {
     const hint = String(content || '').replace(/\s+/g, ' ').slice(0, 120);
     throw new Error(hint ? '模型没有返回题目（原始输出前 120 字：' + hint + '）' : '模型没有返回内容，请重试');

@@ -1306,7 +1306,7 @@ function practiceModal() {
             <div class="pq-body">${renderMath(q.question)}</div>
             <details class="pq-ans"><summary>答案与解析</summary>
               <div class="pq-a">${renderMath(q.answer)}</div>
-              ${q.explain ? `<div class="pq-e">${renderMath(q.explain)}</div>` : ''}
+              <div class="pq-e">${q.explain ? renderMath(q.explain) : '（本题未给出解析）'}</div>
               ${q.ref ? `<div class="pq-ref">对应知识点：${esc(q.ref)}</div>` : ''}
             </details>
           </div>`

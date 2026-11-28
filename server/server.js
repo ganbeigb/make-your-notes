@@ -1850,7 +1850,7 @@ function practiceDigest(subjectId) {
   for (const [cid, list] of byCat) {
     const name = cid ? (catName.get(cid) || '未命名分类') : '未归类';
     lines.push(`【${name}】共 ${list.length} 条`);
-    const sorted = list.slice().sort((a, b) => (b.importance || 0) - (a.importance || 0)).slice(0, 40);
+    const sorted = list.slice().sort((a, b) => (b.importance || 0) - (a.importance || 0)).slice(0, 200);
     for (const it of sorted) {
       const tag = it.kind === 'extension' ? '，拓展' : '';
       lines.push(`- ${it.name}（${it.importance || 3}${tag}）`);
@@ -1860,7 +1860,7 @@ function practiceDigest(subjectId) {
   if (!items.length) lines.push('（这个科目还没有任何笔记）');
 
   let text = lines.join('\n');
-  if (text.length > 7000) text = text.slice(0, 7000) + '\n…（已截断）';
+  if (text.length > 12000) text = text.slice(0, 12000) + '\n…（已截断）';
 
   return {
     subject,
@@ -1922,7 +1922,7 @@ function practiceHtml(rec, kind) {
     const head = `<div class="q"><div class="qh"><span class="no">${i + 1}</span><span class="type">${escHtml(q.type || '')}</span></div><div class="body">${renderMathText(q.question)}</div>`;
     if (!isAnswer) return head + '<div class="blank"></div></div>';
     return head + `<div class="ans"><b>答案：</b>${renderMathText(q.answer)}</div>`
-      + (q.explain ? `<div class="exp"><b>解析：</b>${renderMathText(q.explain)}</div>` : '')
+      + `<div class="exp"><b>解析：</b>${q.explain ? renderMathText(q.explain) : '（本题模型未给出解析）'}</div>`
       + (q.ref ? `<div class="ref">对应知识点：${escHtml(q.ref)}</div>` : '') + '</div>';
   }).join('');
 
