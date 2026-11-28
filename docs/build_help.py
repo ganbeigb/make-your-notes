@@ -8,13 +8,14 @@ import base64
 import io
 import os
 import re
+from urllib.parse import unquote
 
 from lxml import html as LH
 from PIL import Image
 
 ROOT = r"D:\dshwork\课件知识点助手"
-SRC = os.path.join(ROOT, "docs", "用户手册.html")
-OUT = os.path.join(ROOT, "public", "help.html")
+SRC = os.environ.get("MANUAL_HTML") or os.path.join(ROOT, "docs", "用户手册.html")
+OUT = os.environ.get("HELP_OUT") or os.path.join(ROOT, "public", "help.html")
 SHOT = os.path.join(ROOT, "截图")
 
 doc = LH.parse(SRC).getroot()
@@ -24,7 +25,7 @@ img_cache = {}
 
 
 def img_data(src):
-    name = os.path.basename(src or "")
+    name = os.path.basename(unquote(src or ""))
     if name in img_cache:
         return img_cache[name]
     path = os.path.join(SHOT, name)

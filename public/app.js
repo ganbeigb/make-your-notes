@@ -1175,7 +1175,7 @@ function moreSheet() {
         <button data-act="organize">${icon('tree')} 自动整理目录</button>
         <button data-act="mm-subject">${icon('tree')} 思维导图</button>
         <button data-act="open-practice">${icon('spark')} 练习题（推测进度）</button>
-        <button data-act="open-help">${icon('file')} 用户手册</button>
+        <button data-act="open-help">${icon('file')} 用户手册（${isTouchUi() ? '手机版' : '电脑版'}）</button>
         <button data-act="open-criteria">${icon('file')} 分类标准</button>
         <button data-act="open-usage">${icon('download')} 用量与花费</button>
         <button data-act="export-md">${icon('file')} 导出 Markdown</button>
@@ -1277,7 +1277,7 @@ async function finishOnboard(openSettings) {
   if (openSettings) {
     setTimeout(() => openModal('settings'), 120);
   } else {
-    toast('随时可以在「⋯ → 用户手册」里再看一遍');
+    toast(isTouchUi() ? '随时可以在「⋯ → 用户手册（手机版）」里再看一遍' : '随时可以在「⋯ → 用户手册（电脑版）」里再看一遍');
   }
 }
 
@@ -3939,7 +3939,7 @@ document.addEventListener('click', async (e) => {
     case 'save-criteria':
       return saveCriteria();
     case 'open-help':
-      location.href = '/help.html';
+      location.href = isTouchUi() ? '/help-phone.html' : '/help-pc.html';
       return;
     case 'onboard-next':
       ui.onboard = { step: Math.min(ONBOARD_STEPS.length - 1, (ui.onboard?.step || 0) + 1) };
@@ -3948,7 +3948,7 @@ document.addEventListener('click', async (e) => {
       ui.onboard = { step: Math.max(0, (ui.onboard?.step || 0) - 1) };
       return renderModal();
     case 'onboard-help':
-      location.href = '/help.html';
+      location.href = isTouchUi() ? '/help-phone.html' : '/help-pc.html';
       return;
     case 'onboard-skip':
       return finishOnboard(false);

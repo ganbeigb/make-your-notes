@@ -482,10 +482,11 @@ git push
 
 ## 更新记录
 
-完整历史（共 93 个版本，从 v1.0.0 到 v2.10.8）见 **[CHANGELOG.md](CHANGELOG.md)**；主版本只在新增独立页面时升，只有「开辟新能力类型」才走次版本，其余都记在修订号。
+完整历史（共 94 个版本，从 v1.0.0 到 v2.10.9）见 **[CHANGELOG.md](CHANGELOG.md)**；主版本只在新增独立页面时升，只有「开辟新能力类型」才走次版本，其余都记在修订号。
 
 最近几个版本：
 
+- **v2.10.9（versionCode 98）**：用户手册分电脑版/手机版（手机版无需 Node.js），并新增 API Key 获取步骤。
 - **v2.10.8（versionCode 97）**：练习题去掉 HTML/PDF 导出（答案在弹窗内看），修掉未渲染 `$…# Make Your Notes
 
 <img src="assets/icon-512.png" width="96" align="right" alt="Make Your Notes 图标" />

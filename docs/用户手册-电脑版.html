@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>Make Your Notes 用户手册</title><style>
+@page { size: A4; margin: 17mm 15mm 16mm 15mm; }
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body {
+  margin: 0; color: #1f2421; background: #fff;
+  font-family: "Microsoft YaHei", "PingFang SC", "Source Han Sans SC", sans-serif;
+  font-size: 10.5pt; line-height: 1.72; font-weight: 400;
+  text-align: justify;
+}
+.cover { text-align: center; padding-top: 42mm; page-break-after: always; }
+.brand { font-size: 30pt; font-weight: 700; color: #2f5d4b; letter-spacing: 1px; }
+.doc { font-size: 19pt; margin-top: 6mm; font-weight: 400; }
+.sub { font-size: 10.5pt; color: #6e7670; margin-top: 5mm; }
+table.meta { margin: 12mm auto 0; width: 96%; border-collapse: collapse; text-align: left; font-size: 9.5pt; }
+table.meta th, table.meta td { border: 1px solid #cec7b6; padding: 2.6mm 3mm; font-weight: 400; }
+table.meta th { width: 22%; background: #f4f1ea; font-weight: 700; color: #2f5d4b; }
+.cover-h { text-align: left; margin: 14mm 0 3mm; }
+
+.toc { page-break-after: always; }
+.toc h2 { margin-top: 0; }
+
+h1 {
+  font-size: 15pt; font-weight: 700; color: #2f5d4b;
+  margin: 9mm 0 3mm; padding-bottom: 1.6mm; border-bottom: 1px solid #e0d9c8;
+  page-break-after: avoid; break-after: avoid;
+}
+h2 {
+  font-size: 11.5pt; font-weight: 700; color: #3d6b57;
+  margin: 6mm 0 2mm; page-break-after: avoid; break-after: avoid;
+}
+p { margin: 0 0 2.2mm; }
+ul, ol { margin: 0 0 2.6mm 5.2mm; padding: 0; }
+li { margin: 0 0 1.4mm; }
+
+table { width: 100%; border-collapse: collapse; margin: 2mm 0 4mm; font-size: 9.5pt; }
+th, td { border: 1px solid #cec7b6; padding: 1.9mm 2.4mm; vertical-align: top; text-align: left; }
+thead th { background: #eef2ee; font-weight: 700; color: #2f5d4b; }
+tbody td { font-weight: 400; }
+
+figure { margin: 2mm 0 4mm; text-align: center; page-break-inside: avoid; break-inside: avoid; }
+figure img { display: block; margin: 0 auto; max-width: 100%; border: 1px solid #e0d9c8; border-radius: 1.5mm; }
+figure.wide img { width: 100%; }
+figure.phone img { width: 62%; }
+figcaption { font-size: 8.6pt; color: #6e7670; margin-top: 1.6mm; }
+
+.tail { font-size: 8.6pt; color: #6e7670; margin-top: 6mm; }
+</style></head><body><section class="cover">
+<div class="brand">Make Your Notes</div>
+<div class="doc">用户手册</div>
+<div class="sub">电脑版 · 从安装到每天用：建科目 · 传课件 · 看知识点 · 导出与备份</div>
+<table class="meta"><tbody><tr><th>适用版本</th><td>v2.10.8（APK versionCode 97）</td></tr><tr><th>适用人群</th><td>用它整理课件、复习知识点的同学与老师</td></tr><tr><th>不涉及</th><td>不需要懂代码；不需要数据库；不需要联网保存笔记</td></tr><tr><th>配套文档</th><td>《项目说明手册》（结构/模块）、《项目文档》（参赛材料）</td></tr></tbody></table>
+<h2 class="cover-h">五分钟上手</h2>
+<ol><li>装 Node.js 18+，双击 启动.bat，浏览器会打开 http://127.0.0.1:8713。</li><li>照第 3 章拿一个 DeepSeek API Key，填进「设置」；没有 Key 可先开「演示模式」。</li><li>左上角「+」新建科目，写一句你的分类标准（可留空）。</li><li>「上传课件」，把上课拍的 PPT 照片拖进去，等识别完成。</li><li>看「知识点」「分类」，用「导出」带走 Markdown，用「完整备份」留底。</li></ol><p>下面各章按实际操作顺序展开；遇到问题直接跳到最后一章「常见问题」。</p>
+</section>
+<section class="toc">
+<h2>手册目录</h2>
+<table><colgroup><col style="width:8%"><col style="width:34%"><col style="width:58%"></colgroup><thead><tr><th>章</th><th>内容</th><th>要点</th></tr></thead><tbody><tr><td>一</td><td>这是做什么的</td><td>能做什么、不做什么</td></tr><tr><td>二</td><td>安装与启动</td><td>电脑版 / 手机版</td></tr><tr><td>三</td><td>第一次使用：填 Key</td><td>供应商、模型、并发、推理等级</td></tr><tr><td>四</td><td>建科目与分类标准</td><td>分类标准怎么写</td></tr><tr><td>五</td><td>上传课件并识别</td><td>拖拽 / 粘贴 / 选图，识别与校对</td></tr><tr><td>六</td><td>看知识点</td><td>卡片、详情、让 AI 改这一条</td></tr><tr><td>七</td><td>自动整理目录</td><td>按标准归类，可反复整理</td></tr><tr><td>八</td><td>分类视图与思维导图</td><td>列表 / 导图切换</td></tr><tr><td>九</td><td>手写笔记与符号键盘</td><td>自己写、LaTeX 预览</td></tr><tr><td>十</td><td>画板与电路图</td><td>画笔、元件、连线、芯片</td></tr><tr><td>十一</td><td>导出</td><td>Markdown / 图文 HTML / 公式合集 / SVG / JSON</td></tr><tr><td>十二</td><td>备份与恢复</td><td>完整备份、换机器</td></tr><tr><td>十三</td><td>在手机上用</td><td>APK 与扫码访问</td></tr><tr><td>十四</td><td>设置项速查</td><td>每个开关的作用</td></tr><tr><td>十五</td><td>费用与用量</td><td>花多少钱、怎么看</td></tr><tr><td>十六</td><td>常见问题</td><td>10 类典型故障</td></tr><tr><td>十七</td><td>数据与隐私</td><td>数据存在哪、发给谁</td></tr></tbody></table>
+</section>
+<h1>一、这是做什么的</h1>
+<p>把一学期的课件截图（PPT 拍照、PDF 截屏）丢进来，程序会调用大模型逐页识别：转录文字、抽出一页里真正值得记的 1~4 条知识点、再补充一些背景与考点（标为「拓展」）。之后可以按你自己的标准整理成多级目录，导出成可离线阅读的笔记，或者用手机随时翻。</p>
+<p>三件事需要你知道：</p>
+<ul><li>图片和笔记全部存在你自己的电脑（或手机）里，只有截图和文字会发送给模型服务。</li><li>AI 补充的「拓展」条目都带标注，和被老师讲到、有原文出处的「知识点」分开显示。</li><li>每条知识点都带原文片段，点一下能跳回对应课件原页核对。</li></ul>
+<h1>二、安装与启动（电脑版）</h1>
+<h2>2.1 电脑版（Windows）</h2>
+<ol><li>安装 Node.js 18 或更高版本（nodejs.org，装默认选项即可，只需装一次）。</li><li>解压项目文件夹，双击 启动.bat。会弹出一个黑色命令行窗口——它要一直开着。</li><li>浏览器自动打开 http://127.0.0.1:8713。若 8713 被占用，程序会自动换到 8714、8715……实际地址看窗口里打印的那行。</li><li>不想看到窗口：双击 后台启动.vbs（静默运行）。想让它开机就起来：双击 安装开机自启.bat。</li><li>用完停止：关闭命令行窗口，或双击 停止.bat。</li></ol>
+<p>提示：日常使用断网也能打开界面，只是识别和改写需要联网。</p>
+<h1>三、第一次使用：填 Key</h1>
+<h2>3.1 先拿到 API Key（新用户看这里）</h2>
+<p>识别和改写都靠大模型，需要一个 API Key。默认用 DeepSeek，五步拿到：</p>
+<ol><li>打开 platform.deepseek.com，用手机号或邮箱注册、登录。</li><li>左侧菜单点「API keys」→「创建 API key」，名字随便填（例如 mynotes）。</li><li>复制以 sk- 开头的那串字符——它只完整显示一次，关掉弹窗就看不到了，先粘到备忘录里。</li><li>在「充值」页充一点余额（10 元能用很久）；新账号有时会给赠送额度，没充值也能先试。</li><li>回到应用「设置」→ 把 Key 粘进「API Key」→ 点旁边「测试」，提示连通即可开始识别。</li></ol>
+<p>用别的服务也可以：智谱（bigmodel.cn）在设置里把「供应商」换成「智谱」并填它的 Key；用中转服务时，把「接口地址」改成对方给的地址，Key 也用对方的。</p>
+<p>提醒：Key 相当于密码。不要发到群里、不要截图外传；一旦泄露，去网页上删掉重建一个。</p>
+<h2>3.2 填进设置</h2>
+<p>右下角「设置」里有这几项（不同版本措辞略有差异，位置一致）：</p>
+<table><colgroup><col style="width:26%"><col style="width:74%"></colgroup><thead><tr><th>设置项</th><th>怎么填</th></tr></thead><tbody><tr><td>供应商 / 接口地址</td><td>默认 DeepSeek（https://api.deepseek.com）。用中转或本地模型时改成对方地址</td></tr><tr><td>API Key</td><td>见 3.1 的获取步骤；粘进来后点「测试」确认连通</td></tr><tr><td>识别模型（要能读图）</td><td>默认已填好；换模型时这里必须选能看图的模型，否则识别会报错</td></tr><tr><td>文字模型（整理/改稿/起草）</td><td>纯文本模型即可，默认 deepseek-chat</td></tr><tr><td>并发数</td><td>一次同时识别几页。默认 1~2 即可；免费模型建议设 1，避免触发限流</td></tr><tr><td>推理等级</td><td>关闭 / 低 / 高 / 最大。越高越慢越贵，一般「低」够用</td></tr></tbody></table>
+<p>没有 API Key 也能先体验：设置里打开「演示模式」，识别会返回示例数据，不消耗额度。</p>
+<h1>四、建科目与分类标准</h1>
+<figure class="wide"><img src="../%E6%88%AA%E5%9B%BE/08-%E6%96%B0%E5%BB%BA%E7%A7%91%E7%9B%AE.png" alt=""><figcaption>图 1  左上角「+」新建科目，可顺手写下分类标准</figcaption></figure>
+<p>一个科目 = 一门课。建的时候可以填「你希望怎么分类」，例如：「按 电路 / 模电 / 数电 三大块分；公式题单独归到「计算」；不要出现「其他」。」这句话会在「自动整理」时交给模型，所以写得越具体，整理结果越合你意。留空也能用，之后随时在科目里改。</p>
+<h1>五、上传课件并识别</h1>
+<h2>5.1 三种上传方式</h2>
+<ul><li>电脑 · 拖拽：把图片文件直接拖进窗口，会整屏高亮提示「松开上传」。</li><li>电脑 · 粘贴：截图后按 Ctrl+V，直接粘进当前科目。</li><li>手机 / 电脑 · 选图：点「上传课件」从相册（或文件管理器）多选，手机上也能直接拍照。</li></ul>
+<p>图片会被压缩到长边 1800px 再上传，原图只留在本机，所以拍歪、反光也能试，但清晰度会影响识别准确率。</p>
+<h2>5.2 识别过程</h2>
+<p>上传后程序逐页调用模型：先转录整页文字，再抽 1~4 条知识点（每条带原文片段），最后补充拓展内容。右下角会显示「后台识别中 3 / 12」的进度；关掉浏览器也不影响，回到页面结果已经在了。</p>
+<p>识别失败的页面会在卡片上直接写原因（例如 Key 不匹配、限流、模型不支持图片）。开了「严格校对」的话，模型会拿原图再比对一次草稿，只改字符级差异，更准但更慢更贵。</p>
+<h1>六、看知识点</h1>
+<figure class="wide"><img src="../%E6%88%AA%E5%9B%BE/02-%E7%9F%A5%E8%AF%86%E7%82%B9.png" alt=""><figcaption>图 2  「知识点」标签页：卡片式列出，带公式、重要度与来源页</figcaption></figure>
+<p>每张卡片显示：标题、正文前几行、公式（有的话）、标签、重要度圆点、来自第几页。卡片太长会自动折叠，折叠行数可以在设置里改（-1 不折叠、0 只看标题）。</p>
+<h2>6.1 详情页</h2>
+<figure class="wide"><img src="../%E6%88%AA%E5%9B%BE/03-%E9%A1%B5%E9%9D%A2%E8%AF%A6%E6%83%85.png" alt=""><figcaption>图 3  详情页：正文与公式在上，原文片段在下，可一键跳回原页</figcaption></figure>
+<p>点卡片进入详情。这里能看到完整正文、公式（可放大）、原文片段、标签、重要度，以及「跳转原文」直接看那页课件。</p>
+<h2>6.2 让 AI 改这一条</h2>
+<figure class="wide"><img src="../%E6%88%AA%E5%9B%BE/05-%E6%8C%89%E9%9C%80%E4%BF%AE%E6%94%B9.png" alt=""><figcaption>图 4  写一句要求，AI 带着本页原文改写；改完可以撤销</figcaption></figure>
+<p>在详情页写一句要求，例如「把解释压到两行」「补一个数值例子」「把推导补上」，AI 会结合本页原文重写这一条。改完保留旧版本，弹窗里可以「撤销」。如果不希望公式被改动，设置或编辑器里的「保留原公式」打开即可。</p>
+<h1>七、自动整理目录</h1>
+<figure class="wide"><img src="../%E6%88%AA%E5%9B%BE/04-%E8%87%AA%E5%8A%A8%E5%88%86%E7%B1%BB.png" alt=""><figcaption>图 5  按你的标准自动归入 2~3 层目录，不满意可重新整理</figcaption></figure>
+<p>点「自动整理」，程序把当前科目的全部知识点（连同你的分类标准）交给模型，由它给出归类方案，可建 2~3 层目录。整理结果不满意就再点一次；也可以手动把条目拖到别的分类，或改名、删分类。</p>
+<h1>八、分类视图与思维导图</h1>
+<figure class="wide"><img src="../%E6%88%AA%E5%9B%BE/09-%E5%88%86%E7%B1%BB%E5%AF%BC%E5%9B%BE.png" alt=""><figcaption>图 6  分类页可切换「列表 / 导图」，导图能缩放拖动</figcaption></figure>
+<p>「分类」标签页默认按目录列出；点右上角「导图」切换成树状导图，支持双指缩放、拖动、点节点跳到该知识点。导图可以导出成 PNG 或 SVG 放进 PPT。</p>
+<h1>九、手写笔记与符号键盘</h1>
+<figure class="phone"><img src="../%E6%88%AA%E5%9B%BE/10-%E7%AC%A6%E5%8F%B7%E9%94%AE%E7%9B%98.png" alt=""><figcaption>图 7  手动新建的笔记可以用符号键盘快速输入数学符号</figcaption></figure>
+<p>除了从课件里提取，也可以「+ 新建笔记」自己写：标题、正文、公式三块，正文支持 LaTeX 实时预览。输入框聚焦时用符号键盘点选 μ、∂、∑ 这类符号，会插到光标处。手动笔记可以挂在某一页课件下，也可以只属于科目。</p>
+<h1>十、画板与电路图</h1>
+<p>详情页「配图」栏里点「✎ 画配图」进入画板：画笔、常用图形、文字、40 个电子元件、连线、自定义芯片都在这里。画完插进当前笔记，随笔记一起保存与导出。</p>
+<ul><li>连线：点起点、再点终点，自动走直角并绕开元件；端点靠近引脚会自动吸附。</li><li>芯片：先设名称和每边引脚数，再拖出矩形放置，引脚可改编号与名称。</li><li>组合：框选多个元件后可整体移动、旋转 90°、成组缩放。</li><li>撤销/重做：顶栏图标按钮，误操作随时退回。</li></ul>
+<h1>十一、导出</h1>
+<p>顶部「导出」菜单里有五种产物，按用途选：</p>
+<table><colgroup><col style="width:24%"><col style="width:30%"><col style="width:46%"></colgroup><thead><tr><th>导出项</th><th>适合什么场景</th><th>说明</th></tr></thead><tbody><tr><td>Markdown</td><td>粘到别的笔记软件、Notion、Obsidian</td><td>公式写成 $$…$$；末尾附「来源与核验」段落</td></tr><tr><td>学习笔记 HTML（图文文档）</td><td>发给别人看、打印成 PDF</td><td>公式与配图内联，双击即开，完全离线</td></tr><tr><td>公式合集</td><td>考前只背公式</td><td>按分类汇总本页所有公式，带 KaTeX 渲染</td></tr><tr><td>思维导图（SVG / PNG）</td><td>放进 PPT 或打印</td><td>矢量，放大不糊</td></tr><tr><td>JSON（仅文字）</td><td>自己写脚本处理</td><td>不含图片</td></tr></tbody></table>
+<h1>十二、备份与恢复</h1>
+<ol><li>「导出」→「完整备份（含设置与用量）」，得到一个 zip（里面是数据、图片与设置）。</li><li>把 zip 存到网盘或 U 盘；建议每月一次，交作业/换电脑前务必备一次。</li><li>换机器后：点「从备份恢复」，选择 zip；同名科目会合并，重复条目自动跳过。</li></ol>
+<p>旧版备份（不含图片）也能恢复，但图片可能缺失，因为老格式只存了文件路径。</p>
+<h1>十三、在手机上用</h1>
+<figure class="wide"><img src="../%E6%88%AA%E5%9B%BE/06-%E6%89%8B%E6%9C%BA%E8%AE%BF%E9%97%AE.png" alt=""><figcaption>图 8  电脑端点「手机访问」，用手机扫二维码即可（同一 WiFi）</figcaption></figure>
+<figure class="phone"><img src="../%E6%88%AA%E5%9B%BE/07-%E6%89%8B%E6%9C%BA%E7%95%8C%E9%9D%A2.png" alt=""><figcaption>图 9  手机端界面：顶部切换科目，右上角上传，底部切换课件/知识点/分类</figcaption></figure>
+<h2>13.1 两种方式</h2>
+<ul><li>装 APK：完全在手机上运行，不需要电脑（见第二章）。</li><li>扫码访问：电脑开着时，手机扫「手机访问」的二维码，同一套数据、同一个 WiFi 即可。</li></ul>
+<p>扫码打不开时：① 确认手机和电脑在同一 WiFi；② 第一次运行时 Windows 防火墙弹窗要点「允许访问」；③ 校园网/公司网常会隔离设备，换手机热点试试。</p>
+<h1>十四、设置项速查</h1>
+<table><colgroup><col style="width:12%"><col style="width:42%"><col style="width:46%"></colgroup><thead><tr><th>分组</th><th>项目</th><th>作用</th></tr></thead><tbody><tr><td>模型</td><td>供应商 / 接口地址 / API Key</td><td>决定调用哪家模型；用中转就改地址</td></tr><tr><td>模型</td><td>识别模型、文字模型</td><td>识别必须能读图；整理改稿用文字模型</td></tr><tr><td>模型</td><td>并发数、推理等级、严格校对</td><td>控制速度/费用/准确度</td></tr><tr><td>界面</td><td>界面大小、卡片折叠行数、课件图片折叠行数</td><td>字号与信息密度</td></tr><tr><td>界面</td><td>显示原文引用</td><td>关掉后卡片和详情不再显示灰色引用块</td></tr><tr><td>界面</td><td>保留原公式</td><td>AI 改写时不擅自替换公式</td></tr><tr><td>其他</td><td>演示模式</td><td>不调用 API，返回示例数据</td></tr><tr><td>其他</td><td>手机访问</td><td>局域网扫码访问与令牌</td></tr><tr><td>其他</td><td>用量与费用</td><td>按天/用途/科目统计 token 与花费</td></tr></tbody></table>
+<h1>十五、费用与用量</h1>
+<p>识别一页大约 1 分钱，一门课几十页大约几毛到一两块。「用量」面板能看到调用次数、token（含缓存命中）与折算金额，按天出折线图。</p>
+<ul><li>省钱做法：识别时并发 1、不需要时关掉严格校对；整理和改稿用便宜的文字模型。</li><li>遇到 429/5xx：程序会自动退避重试并转单线程，等一会儿再继续即可。</li></ul>
+<h1>十六、常见问题</h1>
+<table><colgroup><col style="width:36%"><col style="width:64%"></colgroup><thead><tr><th>现象</th><th>处理</th></tr></thead><tbody><tr><td>双击 启动.bat 窗口一闪就关</td><td>没装 Node.js 18+，按窗口提示安装后重试</td></tr><tr><td>浏览器打不开 127.0.0.1:8713</td><td>看命令行窗口打印的实际端口（可能已顺延）；或先运行 停止.bat 再启动</td></tr><tr><td>识别报「Key 不匹配 / 401」</td><td>设置里重新粘贴 Key，点「测试」；注意不要带空格</td></tr><tr><td>识别报「模型不支持图片」</td><td>识别模型选错了，换成能读图的模型</td></tr><tr><td>识别报 429 / 5xx</td><td>限流：程序自动重试；把并发数设为 1，或稍后再试</td></tr><tr><td>某些页识别成乱码/漏内容</td><td>拍照时避开反光、尽量正对；对关键页打开「严格校对」重跑一次</td></tr><tr><td>图片显示不出来</td><td>确认 data/images 里还有文件；恢复旧备份可能缺图，重新上传该页即可</td></tr><tr><td>手机上装 APK 被拦</td><td>选「仍然安装」；或在 Play Protect 里关闭应用扫描后再装</td></tr><tr><td>手机扫码打不开</td><td>同一 WiFi、防火墙允许访问；校园网常隔离设备，换热点试</td></tr><tr><td>想换电脑</td><td>旧电脑导出完整备份 → 新电脑从备份恢复</td></tr></tbody></table>
+<h1>十七、数据与隐私</h1>
+<ul><li>笔记、课件图片、设置、用量都存在本机（电脑是项目目录下的 data/，手机是应用私有目录）。</li><li>只有课件截图和文字会发送给模型服务商；不经过本项目作者的服务器（本项目没有服务器）。</li><li>API Key 保存在本机，界面上不回显明文。</li><li>卸载手机 App 会删除数据；覆盖安装同签名 APK 会保留数据。</li></ul>
+<p class="tail">本手册对应版本 v2.10.8；界面文字在后续版本可能有微调，以实际界面为准。最新版本与更新记录见 CHANGELOG.md。</p></body></html>
