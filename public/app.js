@@ -1082,6 +1082,7 @@ function renderModal() {
   } else if (ui.modal.type === 'criteria') box.innerHTML = criteriaModal();
   else if (ui.modal.type === 'usage') box.innerHTML = usageModal();
   else if (ui.modal.type === 'practice') box.innerHTML = practiceModal();
+  else if (ui.modal.type === 'onboard') box.innerHTML = onboardModal();
   else if (ui.modal.type === 'mindmap') {
     box.innerHTML = mindmapModal();
     renderMindmap();
@@ -1153,6 +1154,7 @@ function moreSheet() {
         <button data-act="organize">${icon('tree')} 自动整理目录</button>
         <button data-act="mm-subject">${icon('tree')} 思维导图</button>
         <button data-act="open-practice">${icon('spark')} 练习题（推测进度）</button>
+        <button data-act="open-help">${icon('file')} 用户手册</button>
         <button data-act="open-criteria">${icon('file')} 分类标准</button>
         <button data-act="open-usage">${icon('download')} 用量与花费</button>
         <button data-act="export-md">${icon('file')} 导出 Markdown</button>
@@ -1173,6 +1175,89 @@ function moreSheet() {
 
 
 /* ---------------- 练习题：推测进度 → 出题 → 下载题目/答案 PDF ---------------- */
+
+
+/* ---------------- 首次启动引导 ---------------- */
+
+const ONBOARD_STEPS = [
+  {
+    title: '欢迎使用 Make Your Notes',
+    body: `把课件照片丢进来，它会逐页识别成知识点，再按你的标准整理成目录。
+支持公式、手写笔记、画板配图，手机上也能用。`,
+    tip: '三步就能跑起来：建科目 → 上传课件 → 看知识点。',
+  },
+  {
+    title: '① 建一个科目',
+    body: `点左上角「+」，比如「高等数学」。
+顺便写一句你希望的分类方式（留空也行），自动整理时会照着它归类。`,
+    tip: '一个科目 = 一门课。',
+  },
+  {
+    title: '② 上传课件照片',
+    body: `点「上传课件」选图，也可以直接把图片拖进窗口，或截图后按 Ctrl+V 粘贴。
+识别在后台跑，关掉页面也会继续。`,
+    tip: '一学期的 PPT 拍照可以一次性全传。',
+  },
+  {
+    title: '③ 看知识点、整理目录',
+    body: `「知识点」里是识别结果：每条带公式、重要度、来源页，点一下能跳回原页核对。
+「自动整理」按你的标准归成多级目录，可以反复整理。`,
+    tip: '不满意某条，点「手动编辑」或「AI 修改这条」。',
+  },
+  {
+    title: '填一个 API Key 就可以开始了',
+    body: `识别和改写要用大模型。到 platform.deepseek.com 建一个 Key，粘到设置里即可；
+没有 Key 也能先开「演示模式」走一遍流程。`,
+    tip: '识别一页大约 1 分钱。',
+  },
+];
+
+function onboardModal() {
+  const st = ui.onboard || { step: 0 };
+  const step = ONBOARD_STEPS[st.step] || ONBOARD_STEPS[ONBOARD_STEPS.length - 1];
+  const last = st.step >= ONBOARD_STEPS.length - 1;
+  const dots = ONBOARD_STEPS.map(
+    (_, i) => `<span class="onb-dot ${i === st.step ? 'on' : ''}"></span>`
+  ).join('');
+  return `
+    <div class="panel onboard-panel">
+      <div class="panel-head">
+        <div>
+          <h2>${esc(step.title)}</h2>
+          <div class="sub">第 ${st.step + 1} / ${ONBOARD_STEPS.length} 步</div>
+        </div>
+        <div class="actions"><button class="btn sm ghost" data-act="onboard-skip" title="跳过">${icon('close')}</button></div>
+      </div>
+      <div class="panel-body">
+        <div class="onb-body">${esc(step.body).replace(/\n/g, '<br>')}</div>
+        ${step.tip ? `<div class="onb-tip">${esc(step.tip)}</div>` : ''}
+        <div class="onb-dots">${dots}</div>
+        <div class="onb-actions">
+          <button class="btn ghost sm" data-act="onboard-help">看用户手册</button>
+          ${st.step > 0 ? `<button class="btn sm" data-act="onboard-prev">上一步</button>` : ''}
+          <span class="spacer"></span>
+          <button class="btn ghost sm" data-act="onboard-skip">跳过</button>
+          ${last
+            ? `<button class="btn primary" data-act="onboard-finish">开始使用</button>`
+            : `<button class="btn primary" data-act="onboard-next">下一步</button>`}
+        </div>
+      </div>
+    </div>`;
+}
+
+async function finishOnboard(openSettings) {
+  ui.onboard = null;
+  closeModal();
+  try {
+    S = await api('/api/settings', { onboarded: true }, 'POST');
+  } catch {}
+  render();
+  if (openSettings) {
+    setTimeout(() => openModal('settings'), 120);
+  } else {
+    toast('随时可以在「⋯ → 用户手册」里再看一遍');
+  }
+}
 
 function practiceState() {
   if (!ui.practice) ui.practice = { loading: false, data: null, error: '' };
@@ -3837,6 +3922,22 @@ document.addEventListener('click', async (e) => {
       return openModal('criteria');
     case 'save-criteria':
       return saveCriteria();
+    case 'open-help':
+      location.href = '/help.html';
+      return;
+    case 'onboard-next':
+      ui.onboard = { step: Math.min(ONBOARD_STEPS.length - 1, (ui.onboard?.step || 0) + 1) };
+      return renderModal();
+    case 'onboard-prev':
+      ui.onboard = { step: Math.max(0, (ui.onboard?.step || 0) - 1) };
+      return renderModal();
+    case 'onboard-help':
+      location.href = '/help.html';
+      return;
+    case 'onboard-skip':
+      return finishOnboard(false);
+    case 'onboard-finish':
+      return finishOnboard(!S.settings.hasKey && !S.settings.mock);
     case 'open-practice':
       ui.practice = ui.practice || { loading: false, data: null, error: '' };
       return openModal('practice');
@@ -4005,4 +4106,11 @@ document.addEventListener('contextmenu', (e) => {
   lockPageZoom();
   render();
   ensurePolling();
+  // 首次启动：走一遍使用引导（设置里标记后再也不弹）
+  try {
+    if (!S.settings.onboarded) {
+      ui.onboard = { step: 0 };
+      openModal('onboard');
+    }
+  } catch {}
 })();

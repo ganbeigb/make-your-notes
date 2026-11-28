@@ -235,6 +235,7 @@ function publicState() {
       boardSettings: db.settings.boardSettings || { autoRewire: true, grid: true, snap: true, snapDrag: true, avoid: true },
       concurrency: db.settings.concurrency,
       autoExtract: db.settings.autoExtract,
+      onboarded: !!db.settings.onboarded,
       autoOrganize: !!db.settings.autoOrganize,
       mock: !!db.settings.mock,
       allowLan: !!db.settings.allowLan,
@@ -620,6 +621,7 @@ async function handleSettings(req, res) {
   if (typeof body.autoOrganize === 'boolean') db.settings.autoOrganize = body.autoOrganize;
   if (typeof body.mock === 'boolean') db.settings.mock = body.mock;
   if (typeof body.allowLan === 'boolean') db.settings.allowLan = body.allowLan;
+  if (typeof body.onboarded === 'boolean') db.settings.onboarded = body.onboarded;
   if (Number.isFinite(body.concurrency)) {
     db.settings.concurrency = Math.max(1, Math.min(6, Math.round(body.concurrency)));
   }

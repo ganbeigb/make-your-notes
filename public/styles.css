@@ -1244,3 +1244,31 @@ html.allow-select body * {
 .dw-dirbar-sep { height: 1px; background: var(--line); margin: 2px 0; }
 .dw-dirbar button.off { opacity: .35; }
 
+
+/* ---------------- 练习题 ---------------- */
+.practice-panel { max-width: 720px; }
+.practice-progress { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin: 14px 0; background: var(--paper-2); }
+.pp-level { font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+.pp-line { font-size: 13px; color: var(--ink-2); line-height: 1.7; }
+.practice-list { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+.practice-q { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; background: #fff; }
+.pq-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.pq-no { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-weight: 700; font-size: 12px; }
+.pq-type { font-size: 12px; color: var(--muted); }
+.pq-body { line-height: 1.75; }
+.pq-ans { margin-top: 8px; font-size: 13px; }
+.pq-ans summary { cursor: pointer; color: var(--accent); }
+.pq-a, .pq-e { margin-top: 6px; line-height: 1.7; }
+.pq-ref { margin-top: 4px; color: var(--muted); font-size: 12px; }
+.practice-download { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--line); }
+.practice-download .hint { flex-basis: 100%; font-size: 12px; color: var(--muted); }
+
+/* ---------------- 首次引导 ---------------- */
+.onboard-panel { max-width: 560px; }
+.onb-body { line-height: 1.9; font-size: 14px; white-space: normal; }
+.onb-tip { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: var(--accent-soft); color: var(--accent); font-size: 13px; }
+.onb-dots { display: flex; gap: 6px; justify-content: center; margin: 18px 0 6px; }
+.onb-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--line); }
+.onb-dot.on { background: var(--accent); width: 18px; border-radius: 4px; }
+.onb-actions { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.onb-actions .spacer { flex: 1; }
